@@ -5,7 +5,7 @@ if len(strs) > 0:
     min_word = min(strs[0], strs[-1])
     max_word = max(strs[0], strs[-1])
 
-    for i in range(len(min_word)):
+    for i, value in enumerate(min_word):
         if min_word[i] == max_word[i]:
             s += min_word[i]
         else:
