@@ -1,5 +1,5 @@
-def hamming_weight(n: int) -> int:
-    return bin(n).count("1")
+def hamming_weight(x: int) -> int:
+    return bin(x).count("1")
 
 while True:
     user_input = input("Введите положительное целое число: ")
