@@ -6,6 +6,7 @@ def factorial(number):
         resultFactor *= i
     return resultFactor
 
+
 value = int(input("Введите число ступенек: "))
 valueOfBigStep = value // 2
 valueOfLittleStep = value % 2
