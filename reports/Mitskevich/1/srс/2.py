@@ -13,7 +13,7 @@ result = 0
 while valueOfBigStep >= 0:
     result += factorial(valueOfLittleStep + valueOfBigStep) // (
         factorial(valueOfLittleStep) * (factorial(valueOfBigStep))
-        )
+    )
     valueOfBigStep -= 1
     valueOfLittleStep += 2
 print(f"Результат: {result}")

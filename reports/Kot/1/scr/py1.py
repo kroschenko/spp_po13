@@ -4,6 +4,7 @@ def find_outlier_median(seq):
     outlier = max(seq, key=lambda x: abs(x - median))
     return outlier
 
+
 numbers = list(map(int, input("Enter array: ").split()))
 print("Array:", numbers)
 print("Outlier:", find_outlier_median(numbers))
