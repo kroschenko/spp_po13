@@ -1,6 +1,6 @@
-numbers=[]
-items=int(input())
+numbers = []
+items = int(input())
 for i in range(items):
-    number=int(input())
+    number = int(input())
     numbers.append(number)
-print(max(numbers)-min(numbers))
+print(max(numbers) - min(numbers))
