@@ -11,6 +11,9 @@ class IntegerSet:
     def __repr__(self):
         return f"IntegerSet(max_size={self.max_size}, elements={self.elements})"
 
+    def __eq__(self, other):
+        return self.max_size == other.max_size and self.elements == other.elements
+
     def contains(self, item):
         return item in self.elements
 
