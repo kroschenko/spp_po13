@@ -91,9 +91,8 @@ class Reader:
             book.location = "каталог"
             print(f"{self.name} вернул книгу '{book.title}'")
             return True
-        else:
-            print(f"У {self.name} нет такой книги")
-            return False
+        print(f"У {self.name} нет такой книги")
+        return False
 
     def show_borrowed_books(self):
         if not self.borrowed_books:
