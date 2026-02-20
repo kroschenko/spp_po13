@@ -57,7 +57,7 @@ class IsoscelesTriangle:
         status = "существует" if self.is_valid() else "не существует"
         return (
             f"равнобедренный треугольник: боковые стороны = {self._lateral_side}, "
-                f"основание = {self._base} ({status})"
+            f"основание = {self._base} ({status})"
         )
 
     def __eq__(self, other: object) -> bool:
