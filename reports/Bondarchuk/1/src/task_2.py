@@ -1,3 +1,5 @@
+"""1.2)"""
+
 if __name__ == '__main__':
     m = int(input("m:"))
     n = int(input("n:"))

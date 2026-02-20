@@ -1,4 +1,7 @@
+"""1.2)"""
+
 def product(nums) :
+    """произведение"""
     if len(nums) == 0:
         return  0
     prod = 1
