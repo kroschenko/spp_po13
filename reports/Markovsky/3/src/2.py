@@ -156,7 +156,7 @@ class MedicalCabinet:
                 results[thermo.name] = temperature
                 print(f"Результат: {temperature}°C")
             else:
-                print(f"Не удалось измерить температуру...")
+                print("Не удалось измерить температуру...")
 
             if hasattr(thermo, 'turn_off'):
                 thermo.turn_off()
@@ -192,6 +192,6 @@ adapter.turn_on()
 temp = adapter.measure_temperature()
 if temp:
     print(f"Получена температура: {temp}°C")
-print(f"\nСостояние аналогового градусника после измерения через адаптер:")
+print("\nСостояние аналогового градусника после измерения через адаптер:")
 print(analog)
 adapter.turn_off()
