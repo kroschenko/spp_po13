@@ -45,7 +45,7 @@ class Route:
                 print(f"Reserve {reserve_transport} assigned to route")
             else:
                 self.interval += 5
-                print(f"No reserve available. Interval increased to {self.interval}")            
+                print(f"No reserve available. Interval increased to {self.interval}")
     def show_status(self):
         print(f"\n=== Route {self.number} ===")
         print(f"Interval: {self.interval} minutes")
