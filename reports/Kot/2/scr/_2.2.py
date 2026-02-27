@@ -34,22 +34,29 @@ class Route:
     def add_reserve(self, transport):
         self.reserve.append(transport)
     def handle_breakdown(self, transport):
-        print(f"Handling breakdown on route {self.number}")
-        if self.reserve:
-            reserve_transport = self.reserve.pop(0)
-            reserve_transport.assign_route(self)
-            self.transports.append(reserve_transport)
-            print(f"Reserve {reserve_transport} assigned to route")
-        else:
-            self.interval += 5
-            print(f"No reserve available. Interval increased to {self.interval}")
+        print(f"Handling breakdown of {transport} on route {self.number}")
+        if transport in self.transports:
+            self.transports.remove(transport)
+            transport.is_working = False
+            if self.reserve:
+                reserve_transport = self.reserve.pop(0)
+                reserve_transport.assign_route(self)
+                self.transports.append(reserve_transport)
+                print(f"Reserve {reserve_transport} assigned to route")
+            else:
+             self.interval += 5
+             print(f"No reserve available. Interval increased to {self.interval}")            
     def show_status(self):
-        print(f"\nRoute {self.number}")
+        print(f"\n=== Route {self.number} ===")
         print(f"Interval: {self.interval} minutes")
         print("Active transports:")
         for t in self.transports:
-            if t.is_working:
-                print(f"{t}")
+            status = "working" if t.is_working else "broken"
+            print(f"  {t} - {status}")
+        if self.reserve:
+            print("Reserve transports:")
+            for r in self.reserve:
+                print(f"  {r}")
 route1 = Route(10, 15)
 bus1 = Bus(101)
 trolley1 = Trolleybus(201)
