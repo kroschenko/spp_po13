@@ -32,9 +32,9 @@ class Route:
         transport.assign_route(self)
         self.transports.append(transport)
     def add_reserve(self, transport):
+        print(f"Handling breakdown of {transport} on route {sel
         self.reserve.append(transport)
-    def handle_breakdown(self, transport):
-        print(f"Handling breakdown of {transport} on route {self.number}")
+    def handle_breakdown(self, transport):f.number}")
         if transport in self.transports:
             self.transports.remove(transport)
             transport.is_working = False
@@ -44,8 +44,8 @@ class Route:
                 self.transports.append(reserve_transport)
                 print(f"Reserve {reserve_transport} assigned to route")
             else:
-               self.interval += 5
-               print(f"No reserve available. Interval increased to {self.interval}")            
+                self.interval += 5
+                print(f"No reserve available. Interval increased to {self.interval}")            
     def show_status(self):
         print(f"\n=== Route {self.number} ===")
         print(f"Interval: {self.interval} minutes")
