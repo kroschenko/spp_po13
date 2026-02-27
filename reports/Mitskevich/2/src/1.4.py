@@ -2,44 +2,43 @@ from enum import Enum
 
 class Rectangle:
     def __init__(self, sideA, sideB):
-        if (sideB > 0 or sideA > 0):
+        if sideB > 0 or sideA > 0:
             self._sideA = sideA
             self._sideB = sideB
-        else:  
+        else:
             print("Неверный ввод данных, используются значения по умолчанию")
             self._sideA = 5
             self._sideB = 10
 
     def square(self):
-        return self._sideA*self._sideB
+        return self._sideA * self._sideB
 
     def perimeter(self):
-        return 2*(self._sideA + self._sideB)
+        return 2 * (self._sideA + self._sideB)
     
     def isKvadrat(self):
-        if self._sideA==self._sideB:
+        if self._sideA == self._sideB:
             return True
-        
         return False
     
     def isReal(self):
-        if (self._sideB <= 0 or self._sideA <= 0):
+        if self._sideB <= 0 or self._sideA <= 0:
             return False
         return True
 
     def __eq__(self, other):
-        if (self.square() == other.square()):
+        if self.square() == other.square():
             return True
         return False
 
 class Menu(Enum):
-    CREATE=1
-    SQUARE=2
-    PERIM=3
-    IS_KVAD=4
-    IS_REAL=5
-    EQ=6
-    EXT=7
+    CREATE = 1
+    SQUARE = 2
+    PERIM = 3
+    IS_KVAD = 4
+    IS_REAL = 5
+    EQ = 6
+    EXT = 7
 
 print("МЕНЮ")
 print(f"{Menu.CREATE.value}) Создать прямоугольник")
@@ -54,18 +53,18 @@ rect = None
 rect_2 = None
 
 while True:
-    chouse = int (input("\nСделайте выбор "))
+    chouse = int(input("\nСделайте выбор "))
     match chouse:
         case Menu.CREATE.value:
-            sideA = int(input ("Введите сторону А"))
-            sideB = int(input ("Введите сторону В"))
+            sideA = int(input("Введите сторону А"))
+            sideB = int(input("Введите сторону В"))
             rect = Rectangle(sideA, sideB)
 
         case Menu.SQUARE.value:
             if rect:
                 print(f"Площадь = {rect.square()}")
             else:
-                print("Сначала создайте прямоугольник!")  
+                print("Сначала создайте прямоугольник!")
 
         case Menu.PERIM.value:
             if rect:
@@ -95,8 +94,8 @@ while True:
                 print("Сначала создайте первый прямоугольник!")
 
         case Menu.EXT.value:
-            print ("ДО СВИДАНИЯ!")
+            print("ДО СВИДАНИЯ!")
             break
 
         case _:
-                print("Неверный выбор! Попробуйте снова.")
+            print("Неверный выбор! Попробуйте снова.")

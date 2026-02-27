@@ -16,14 +16,14 @@ class Doctor(MedicalStaff):
 
     def __init__(self, name, specializacia):
         super().__init__(name)
-        self.specializacia = specializacia 
+        self.specializacia = specializacia
 
     def creatNaznachenie(self, pacient, typeNazn, nameNazn):
         print(f"Врач {self.name} назначил {typeNazn}: {nameNazn} для {pacient.name}")
         pacient.addPrescription(typeNazn, nameNazn)
 
     def doOperation(self, pacient):
-        if "operation" in pacient.prescriptions and pacient.prescriptions["operation"]: ##первое - есть ли ключ оператион в мапе, второе - есть ли там значение 
+        if "operation" in pacient.prescriptions and pacient.prescriptions["operation"]:
             opName = pacient.prescriptions["operation"].pop(0)
             print(f"Врач {self.name} проводит операцию: {opName} пациенту {pacient.name}")
         else:
@@ -32,14 +32,10 @@ class Doctor(MedicalStaff):
 class Pacient:
     def __init__(self, name):
         self.name = name
-        self.prescriptions = {
-            "procedur": [],
-            "lekcarstvo": [],
-            "operation": []
-        }
+        self.prescriptions = {"procedur": [], "lekcarstvo": [], "operation": []}
         self.isDischarged = False
         self.lechaushiyVarch = None
-    
+
     def addPrescription(self, category, name):
         if category in self.prescriptions:
             self.prescriptions[category].append(name)
@@ -72,7 +68,7 @@ doctor1 = Doctor("Фолитарик", "Хирург")
 medSister1 = Medsister("Яна")
 
 # Создаем пациента
-pacient1= Pacient("Шрамук")
+pacient1 = Pacient("Шрамук")
 
 # Назначаем лечащего врача (Ассоциация)
 pacient1.setDoctor(doctor1)
