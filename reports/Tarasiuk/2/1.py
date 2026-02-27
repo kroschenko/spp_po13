@@ -21,7 +21,7 @@ class Set:
             print(f"Элемент {value} уже состоит в множестве")
         else:
             print(f"Достигнута максимальная мощность {self.max_size}, нельзя добавить больше элементов")
-    
+
     def remove(self, value):
         if value in self.elements:
             self.elements.remove(value)
