@@ -195,7 +195,7 @@ def main():
         print(f"\n{invoice_obj}")
         print(f"осталось мест в поезде: {train1.free_seats()}")
     else:
-        print("\nнет свободных мест")
+        print("\nнет свободных мест") 
 
 if __name__ == "__main__":
     main()
