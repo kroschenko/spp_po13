@@ -3,8 +3,8 @@ class RealSet:
         self._max_size = max_size
         self._data = []
         if elements:
-            for elem in elements:
-                self.add(elem)
+            for e in elements:
+                self.add(e)
 
     def get_size(self):
         return len(self._data)
@@ -19,8 +19,7 @@ class RealSet:
             self._max_size = value
 
     def __str__(self):
-        elements = [str(round(x, 2)) for x in self._data]
-        return "{" + ", ".join(elements) + "}"
+        return "{" + ", ".join([str(round(x, 2)) for x in self._data]) + "}"
 
     def __eq__(self, other):
         if not isinstance(other, RealSet):
@@ -33,27 +32,20 @@ class RealSet:
     def add(self, x):
         try:
             num = float(x)
-        except ValueError:
+            if num not in self._data:
+                if len(self._data) < self._max_size:
+                    self._data.append(num)
+                else:
+                    print(f"Ошибка: достигнут максимум ({self._max_size} элементов)")
+            else:
+                print(f"Элемент {num} уже существует")
+        except:
             print("Ошибка: нужно вещественное число")
-            return
-
-        if num in self._data:
-            print(f"Элемент {num} уже существует")
-            return
-
-        if len(self._data) >= self._max_size:
-            print(f"Ошибка: достигнут максимум ({self._max_size} элементов")
-            return
-
-        self._data.append(num)
 
     def remove(self, x):
         try:
-            num = float(x)
-            self._data.remove(num)
-        except ValueError:
-            print(f"Ошибка: нужно вещественное число")
-        except ValueError:
+            self._data.remove(float(x))
+        except:
             print(f"Элемент {x} не найден")
 
     def union(self, other):
@@ -62,11 +54,12 @@ class RealSet:
         return RealSet(new_max, new_data[:new_max])
 
 
+# пример
 a = RealSet(5, [1.5, 2.3, 3.7])
 b = RealSet(3, [2.3, 4.1])
 print(f"A: {a}, размер: {a.get_size()}/{a.get_max_size()}")
 a.add(5.5)
-a.add(1.5)
+a.add(1.5)  # уже есть
 print(f"A после добавлений: {a}")
 print(f"2.3 в A? {a.contains(2.3)}")
 c = a.union(b)

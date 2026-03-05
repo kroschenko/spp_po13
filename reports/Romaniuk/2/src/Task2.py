@@ -2,16 +2,19 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List, Optional, Dict
 
+
 class IAccounting(ABC):
 
     @abstractmethod
     def calculate_price(self, base_price: float) -> float:
         """Рассчитать цену с налогом."""
 
+
 class Entity:
 
     def __init__(self, entity_id: int):
         self.id = entity_id
+
 
 class Station(Entity):
 
@@ -22,6 +25,7 @@ class Station(Entity):
 
     def __str__(self) -> str:
         return f"{self.city} - {self.name}"
+
 
 class Carriage(Entity):
 
@@ -39,6 +43,7 @@ class Carriage(Entity):
                 count += 1
         return count
 
+
 class Seat:
 
     def __init__(self, number: int):
@@ -47,6 +52,7 @@ class Seat:
 
     def take(self) -> None:
         self.is_taken = True
+
 
 class Train(Entity):
 
@@ -66,6 +72,7 @@ class Train(Entity):
             total += carriage.free_seats()
         return total
 
+
 class Passenger(Entity):
 
     def __init__(self, entity_id: int, name: str, phone: str):
@@ -79,6 +86,7 @@ class Passenger(Entity):
         self.requests.append(new_request)
         return new_request
 
+
 class Request(Entity):
 
     def __init__(self, entity_id: int, passenger: Passenger, station: Station, date: datetime):
@@ -91,6 +99,7 @@ class Request(Entity):
     def __str__(self) -> str:
         return f"заявка {self.id}: {self.passenger.name} -> {self.station.city}"
 
+
 class Invoice(Entity):
 
     def __init__(self, entity_id: int, amount: float, passenger: Passenger):
@@ -102,10 +111,12 @@ class Invoice(Entity):
     def __str__(self) -> str:
         return f"счет {self.id} на {self.amount} руб"
 
+
 class SimpleAccounting(IAccounting):
 
     def calculate_price(self, base_price: float) -> float:
         return base_price * 1.13
+
 
 class Administrator:
 
@@ -126,6 +137,7 @@ class Administrator:
         self.system.trains.append(train)
         print(f"поезд {number} добавлен")
         return train
+
 
 class RailwayTicketSystem:
 
@@ -165,6 +177,7 @@ class RailwayTicketSystem:
                     return invoice
         return None
 
+
 def main():
     print("ЖЕЛЕЗНОДОРОЖНАЯ КАССА")
 
@@ -177,6 +190,7 @@ def main():
     print("\nстанции добавлены:")
 
     train1 = system.admin.add_train("101", [brest, minsk, vitebsk], {"купе": 50, "плацкарт": 30})
+    train2 = system.admin.add_train("202", [brest, minsk], {"купе": 20, "плацкарт": 12})
 
     ivan = system.register_passenger("иван петров", "+375292563625")
     print(f"\nпассажир: {ivan.name}")
@@ -196,6 +210,7 @@ def main():
         print(f"осталось мест в поезде: {train1.free_seats()}")
     else:
         print("\nнет свободных мест") 
+
 
 if __name__ == "__main__":
     main()
