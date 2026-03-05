@@ -1,11 +1,11 @@
 import os
-import requests
 import time
 import json
+from collections import defaultdict
+import requests
 from dotenv import load_dotenv
 import networkx as nx
 import matplotlib.pyplot as plt
-from collections import defaultdict
 
 load_dotenv()
 
@@ -21,7 +21,7 @@ class GitHubAPIClient:
 
     def make_request(self, url, params=None):
         try:
-            response = requests.get(url, headers=self.headers, params=params)
+            response = requests.get(url, headers=self.headers, params=params, timeout=60)
             if response.status_code == 403:
                 if 'rate limit' in response.text.lower():
                     reset_time = int(response.headers.get('X-RateLimit-Reset', 0))
@@ -29,9 +29,8 @@ class GitHubAPIClient:
                     print(f"Превышен лимит запросов. Ожидание {wait_time:.0f} секунд...")
                     time.sleep(wait_time + 1)
                     return self.make_request(url, params)
-                else:
-                    print(f"Доступ запрещен (403)")
-                    return None
+                print("Доступ запрещен (403)")
+                return None
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -139,7 +138,6 @@ class InteractionCollector:
         self.pr_repos = set()
         self.issue_repos = set()
         self.starred_repos = set()
-        self.all_repos = set()
 
     @staticmethod
     def _extract_usernames_from_items(items, key='user'):
@@ -210,14 +208,17 @@ class InteractionCollector:
                     comments = self.api.get_all_pages(comments_url)
                     if comments:
                         commenters = self._extract_usernames_from_items(comments, 'user')
-                        self.collaboration.add_multiple_collaborators('issue_commenters', commenters)
+                        self.collaboration.add_multiple_collaborators('issue_commenters',
+                                                                      commenters)
                 elif owner == self.username:
                     self.collaboration.add_issue_author(issue_author)
                     comments_url = issue['comments_url']
                     comments = self.api.get_all_pages(comments_url)
                     if comments:
-                        commenters = self._extract_usernames_from_items(comments, 'user')
-                        self.collaboration.add_multiple_collaborators('issue_commenters', commenters)
+                        commenters = self._extract_usernames_from_items(comments,
+                                                                        'user')
+                        self.collaboration.add_multiple_collaborators('issue_commenters',
+                                                                      commenters)
 
         return found_user_issues
 
@@ -229,7 +230,6 @@ class InteractionCollector:
             for repo in starred_data:
                 repo_full_name = repo['full_name']
                 self.starred_repos.add(repo_full_name)
-                self.all_repos.add(repo_full_name)
                 owner = repo_full_name.split('/')[0]
                 self.collaboration.add_starred_owner(owner)
         return self.starred_repos
@@ -241,7 +241,6 @@ class InteractionCollector:
 
         for repo in repos:
             repo_name = repo['full_name']
-            self.all_repos.add(repo_name)
             owner, repo_name_only = repo_name.split('/')
             if self.check_commits_in_repo(owner, repo_name_only):
                 self.commit_repos.add(repo_name)
@@ -252,7 +251,8 @@ class InteractionCollector:
         self.get_starred_repositories()
 
     def get_repos_list(self):
-        return sorted(self.all_repos)
+        all_repos = self.commit_repos | self.pr_repos | self.issue_repos | self.starred_repos
+        return sorted(all_repos)
 
 
 class GraphVisualizer:
@@ -296,12 +296,11 @@ class GraphVisualizer:
 
         pos = nx.spring_layout(self.graph, k=2, iterations=50)
 
-        central_node = [self.username]
         other_nodes = [n for n in self.graph.nodes() if n != self.username]
 
         nx.draw_networkx_nodes(
             self.graph, pos,
-            nodelist=central_node,
+            nodelist=[self.username],
             node_color='#e74c3c',
             node_size=3000,
             node_shape='o'
@@ -333,10 +332,9 @@ class GraphVisualizer:
                     style='solid'
                 )
 
-        labels = {node: node for node in self.graph.nodes()}
         nx.draw_networkx_labels(
             self.graph, pos,
-            labels,
+            {node: node for node in self.graph.nodes()},
             font_size=10,
             font_weight='bold'
         )
@@ -355,11 +353,11 @@ class GraphVisualizer:
                 alpha=0.6
             ))
 
-        plt.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
-
-        plt.title(f"Граф взаимодействий пользователя {self.username}", fontsize=16, fontweight='bold')
+        plt.legend(handles=legend_elements, loc='upper left',
+                   bbox_to_anchor=(1, 1))
+        plt.title(f"Граф взаимодействий пользователя {self.username}",
+                  fontsize=16, fontweight='bold')
         plt.axis('off')
-
         plt.tight_layout()
         plt.savefig(output_filename, dpi=300, bbox_inches='tight')
         print(f"Визуализация графа сохранена в: {output_filename}")
