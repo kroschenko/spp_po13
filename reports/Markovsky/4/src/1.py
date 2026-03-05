@@ -2,6 +2,9 @@ import os
 import requests
 import time
 from dotenv import load_dotenv
+import networkx as nx
+import matplotlib.pyplot as plt
+from collections import defaultdict
 
 load_dotenv()
 
@@ -79,10 +82,13 @@ class CollaborationCollector:
             'issue_commenters': set(),
             'starred_owners': set()
         }
+        self.edge_details = defaultdict(lambda: defaultdict(int))
 
     def _add_collaborator(self, collaborator_type, username):
         if username and username.lower() != self.username:
-            self.collaborators[collaborator_type].add(username.lower())
+            username_lower = username.lower()
+            self.collaborators[collaborator_type].add(username_lower)
+            self.edge_details[username_lower][collaborator_type] += 1
 
     def add_pr_author(self, author):
         self._add_collaborator('pr_authors', author)
@@ -103,6 +109,12 @@ class CollaborationCollector:
             all_collaborators.update(collab_set)
         return all_collaborators
 
+    def get_edge_weight(self, username):
+        return sum(self.edge_details[username].values())
+
+    def get_interaction_types(self, username):
+        return dict(self.edge_details[username])
+
     def print_summary(self):
         print("ВЗАИМОДЕЙСТВИЯ С ДРУГИМИ РАЗРАБОТЧИКАМИ:")
         has_any_interactions = False
@@ -112,7 +124,8 @@ class CollaborationCollector:
                 display_name = self.INTERACTION_TYPES.get(collab_type, collab_type.replace('_', ' ').title())
                 print(f"\n{display_name}: {len(collab_set)}")
                 for collab in sorted(collab_set)[:10]:
-                    print(f"  - {collab}")
+                    weight = self.edge_details[collab][collab_type]
+                    print(f"  - {collab} (взаимодействий: {weight})")
                 if len(collab_set) > 10:
                     print(f"... и еще {len(collab_set) - 10}")
         if not has_any_interactions:
@@ -123,7 +136,8 @@ class CollaborationCollector:
         if all_collabs:
             print("Полный список (первые 20):")
             for i, collab in enumerate(sorted(all_collabs)[:20], 1):
-                print(f"{i}. {collab}")
+                weight = self.get_edge_weight(collab)
+                print(f"{i}. {collab} (общий вес: {weight})")
             if len(all_collabs) > 20:
                 print(f"... и еще {len(all_collabs) - 20}")
 
@@ -266,6 +280,118 @@ class InteractionCollector:
         self.collaboration.print_summary()
 
 
+class GraphVisualizer:
+    EDGE_COLORS = {
+        'commit_authors': '#2ecc71',
+        'pr_reviewers': '#3498db',
+        'pr_authors': '#9b59b6',
+        'issue_authors': '#e74c3c',
+        'issue_commenters': '#f39c12',
+        'starred_owners': '#1abc9c'
+    }
+
+    def __init__(self, username, collaboration_collector):
+        self.username = username
+        self.collaboration = collaboration_collector
+        self.graph = nx.Graph()
+
+    def build_graph(self):
+        self.graph.add_node(self.username, type='central', weight=10)
+        all_collaborators = self.collaboration.get_all_collaborators()
+        for collaborator in all_collaborators:
+            weight = self.collaboration.get_edge_weight(collaborator)
+            self.graph.add_node(collaborator, type='collaborator', weight=weight)
+            interactions = self.collaboration.get_interaction_types(collaborator)
+            for interaction_type, count in interactions.items():
+                self.graph.add_edge(
+                    self.username,
+                    collaborator,
+                    type=interaction_type,
+                    weight=count,
+                    color=self.EDGE_COLORS.get(interaction_type, '#95a5a6')
+                )
+
+        return self.graph
+
+    def visualize(self, output_filename='github_graph.png', figsize=(15, 10)):
+        if self.graph.number_of_nodes() <= 1:
+            print("Недостаточно узлов для визуализации графа")
+            return
+
+        plt.figure(figsize=figsize)
+
+        pos = nx.spring_layout(self.graph, k=2, iterations=50)
+
+        central_node = [self.username]
+        other_nodes = [n for n in self.graph.nodes() if n != self.username]
+
+        nx.draw_networkx_nodes(
+            self.graph, pos,
+            nodelist=central_node,
+            node_color='#e74c3c',
+            node_size=3000,
+            node_shape='o'
+        )
+
+        if other_nodes:
+            node_sizes = [300 + 100 * self.graph.nodes[n].get('weight', 1) for n in other_nodes]
+            nx.draw_networkx_nodes(
+                self.graph, pos,
+                nodelist=other_nodes,
+                node_color='#3498db',
+                node_size=node_sizes,
+                node_shape='o',
+                alpha=0.8
+            )
+
+        for edge in self.graph.edges(data=True):
+            if len(edge) == 3:
+                u, v, data = edge
+                color = data.get('color', '#95a5a6')
+                weight = data.get('weight', 1)
+
+                nx.draw_networkx_edges(
+                    self.graph, pos,
+                    edgelist=[(u, v)],
+                    width=weight * 2,
+                    edge_color=color,
+                    alpha=0.6,
+                    style='solid'
+                )
+
+        labels = {node: node for node in self.graph.nodes()}
+        nx.draw_networkx_labels(
+            self.graph, pos,
+            labels,
+            font_size=10,
+            font_weight='bold'
+        )
+
+        legend_elements = []
+        for interaction_type, color in self.EDGE_COLORS.items():
+            display_name = CollaborationCollector.INTERACTION_TYPES.get(
+                interaction_type,
+                interaction_type.replace('_', ' ').title()
+            )
+            legend_elements.append(plt.Line2D(
+                [0], [0],
+                color=color,
+                lw=4,
+                label=display_name,
+                alpha=0.6
+            ))
+
+        plt.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
+
+        plt.title(f"Граф взаимодействий пользователя {self.username}", fontsize=16, fontweight='bold')
+        plt.axis('off')
+
+        plt.tight_layout()
+        plt.savefig(output_filename, dpi=300, bbox_inches='tight')
+        print(f"\nГраф сохранен в файл: {output_filename}")
+        plt.show()
+
+
 def main():
     username = input("Введите имя пользователя GitHub: ").strip()
     if not username:
@@ -281,6 +407,10 @@ def main():
     )
     collector.collect_interaction_repos()
 
+    print("ПОСТРОЕНИЕ ГРАФА СВЯЗЕЙ")
+    visualizer = GraphVisualizer(username, collaboration_collector)
+    visualizer.build_graph()
+    visualizer.visualize(output_filename='github_graph.png')
 
 if __name__ == "__main__":
     main()
