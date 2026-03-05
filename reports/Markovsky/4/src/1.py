@@ -1,6 +1,7 @@
 import os
 import requests
 import time
+import json
 from dotenv import load_dotenv
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -115,31 +116,18 @@ class CollaborationCollector:
     def get_interaction_types(self, username):
         return dict(self.edge_details[username])
 
-    def print_summary(self):
-        print("ВЗАИМОДЕЙСТВИЯ С ДРУГИМИ РАЗРАБОТЧИКАМИ:")
-        has_any_interactions = False
-        for collab_type, collab_set in self.collaborators.items():
-            if collab_set:
-                has_any_interactions = True
-                display_name = self.INTERACTION_TYPES.get(collab_type, collab_type.replace('_', ' ').title())
-                print(f"\n{display_name}: {len(collab_set)}")
-                for collab in sorted(collab_set)[:10]:
-                    weight = self.edge_details[collab][collab_type]
-                    print(f"  - {collab} (взаимодействий: {weight})")
-                if len(collab_set) > 10:
-                    print(f"... и еще {len(collab_set) - 10}")
-        if not has_any_interactions:
-            print("\nНе найдено взаимодействий с другими разработчиками")
+    def get_collaborators_list(self):
+        return sorted(self.get_all_collaborators())
 
-        all_collabs = self.get_all_collaborators()
-        print(f"\nВСЕГО УНИКАЛЬНЫХ РАЗРАБОТЧИКОВ: {len(all_collabs)}")
-        if all_collabs:
-            print("Полный список (первые 20):")
-            for i, collab in enumerate(sorted(all_collabs)[:20], 1):
-                weight = self.get_edge_weight(collab)
-                print(f"{i}. {collab} (общий вес: {weight})")
-            if len(all_collabs) > 20:
-                print(f"... и еще {len(all_collabs) - 20}")
+    def to_dict(self):
+        return {
+            'username': self.username,
+            'collaborators': list(self.get_all_collaborators()),
+            'interaction_details': {
+                user: dict(interactions)
+                for user, interactions in self.edge_details.items()
+            }
+        }
 
 
 class InteractionCollector:
@@ -151,6 +139,7 @@ class InteractionCollector:
         self.pr_repos = set()
         self.issue_repos = set()
         self.starred_repos = set()
+        self.all_repos = set()
 
     @staticmethod
     def _extract_usernames_from_items(items, key='user'):
@@ -233,7 +222,6 @@ class InteractionCollector:
         return found_user_issues
 
     def get_starred_repositories(self):
-        print("\nПолучаем звезды...")
         url = f"{self.api.base_url}/users/{self.username}/starred"
         starred_data = self.api.get_all_pages(url)
 
@@ -241,43 +229,30 @@ class InteractionCollector:
             for repo in starred_data:
                 repo_full_name = repo['full_name']
                 self.starred_repos.add(repo_full_name)
+                self.all_repos.add(repo_full_name)
                 owner = repo_full_name.split('/')[0]
                 self.collaboration.add_starred_owner(owner)
-
-        print(f"Найдено {len(self.starred_repos)} репозиториев со звездами")
         return self.starred_repos
 
     def collect_interaction_repos(self):
         repos = self.get_user_repos()
         if not repos:
-            print("Не удалось получить репозитории пользователя")
             return
-        print(f"\nВсего репозиториев для анализа: {len(repos)}")
 
         for repo in repos:
             repo_name = repo['full_name']
+            self.all_repos.add(repo_name)
             owner, repo_name_only = repo_name.split('/')
-            print("---")
-            print(repo_name_only)
             if self.check_commits_in_repo(owner, repo_name_only):
                 self.commit_repos.add(repo_name)
-                print(f" - Коммиты: {repo_name}")
             if self.check_prs_in_repo(owner, repo_name_only):
                 self.pr_repos.add(repo_name)
-                print(f" - PR: {repo_name}")
             if self.check_issues_in_repo(owner, repo_name_only):
                 self.issue_repos.add(repo_name)
-                print(f" - Issues: {repo_name}")
-
         self.get_starred_repositories()
-        print("---")
-        print("РЕЗУЛЬТАТЫ АНАЛИЗА:")
-        print(f"Пользователь: {self.username}")
-        print(f"Коммиты: {len(self.commit_repos)} репозиториев")
-        print(f"Pull Requests: {len(self.pr_repos)} репозиториев")
-        print(f"Issues: {len(self.issue_repos)} репозиториев")
-        print(f"Звезды: {len(self.starred_repos)} репозиториев")
-        self.collaboration.print_summary()
+
+    def get_repos_list(self):
+        return sorted(self.all_repos)
 
 
 class GraphVisualizer:
@@ -315,7 +290,6 @@ class GraphVisualizer:
 
     def visualize(self, output_filename='github_graph.png', figsize=(15, 10)):
         if self.graph.number_of_nodes() <= 1:
-            print("Недостаточно узлов для визуализации графа")
             return
 
         plt.figure(figsize=figsize)
@@ -388,8 +362,14 @@ class GraphVisualizer:
 
         plt.tight_layout()
         plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-        print(f"\nГраф сохранен в файл: {output_filename}")
+        print(f"Визуализация графа сохранена в: {output_filename}")
         plt.show()
+
+
+def save_to_json(data, filename='github_network.json'):
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print("Граф сохранён в ", filename)
 
 
 def main():
@@ -406,11 +386,24 @@ def main():
         collaboration_collector=collaboration_collector
     )
     collector.collect_interaction_repos()
-
-    print("ПОСТРОЕНИЕ ГРАФА СВЯЗЕЙ")
+    repos_list = collector.get_repos_list()
+    collaborators_list = collaboration_collector.get_collaborators_list()
+    print(f"\nРепозитории ({len(repos_list)}):")
+    for repo in repos_list:
+        print(f"  - {repo}")
+    print(f"\nКонтрибьюторы ({len(collaborators_list)}):")
+    for collab in collaborators_list:
+        print(f"  - {collab}")
     visualizer = GraphVisualizer(username, collaboration_collector)
     visualizer.build_graph()
-    visualizer.visualize(output_filename='github_graph.png')
+    json_data = {
+        'username': username,
+        'repositories': repos_list,
+        'collaborators': collaboration_collector.to_dict()
+    }
+    save_to_json(json_data, 'github_network.json')
+    visualizer.visualize(output_filename='github_network.png')
+
 
 if __name__ == "__main__":
     main()
