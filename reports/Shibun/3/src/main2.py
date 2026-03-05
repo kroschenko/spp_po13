@@ -47,4 +47,3 @@ if __name__ == "__main__":
     bank_card = BankCardDecorator(insured_card)
 
     print(bank_card.info())
-
