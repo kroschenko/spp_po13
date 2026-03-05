@@ -41,8 +41,8 @@ class TransportDecorator(CardDecorator):
 
 
 if __name__ == "__main__":
-    card = BaseCard()
-    card = PassportDecorator(card)
+    base_card = BaseCard()
+    card = PassportDecorator(base_card)
     card = InsuranceDecorator(card)
     card = BankCardDecorator(card)
 
