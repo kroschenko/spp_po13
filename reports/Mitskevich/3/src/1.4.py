@@ -433,12 +433,12 @@ class TravelAgency:
         director = TourDirector(builderFirst)
 
         print("\n--- СОЗДАНИЕ ИНДИВИДУАЛЬНОГО ТУРА ---")
-        self.choice_mashinke(self, builderFirst)
-        self.choice_hata(self, builderFirst)
-        self.choice_pokushat(self, builderFirst)
-        self.choice_excurs(self, builderFirst)
-        self.choice_musei(self, builderFirst)
-        self.choice_dop_uslugi(self, builderFirst)
+        self.choice_mashinke(builderFirst)
+        self.choice_hata(builderFirst)
+        self.choice_pokushat(builderFirst)
+        self.choice_excurs(builderFirst)
+        self.choice_musei(builderFirst)
+        self.choice_dop_uslugi(builderFirst)
         # Строим тур
         tour = director.construct_custom_tour()
         return tour
@@ -529,42 +529,69 @@ class TravelAgency:
             choice = input("Выберите действие: ")
 
             if choice == "0":
-                print("Спасибо за обращение! До свидания!")
+                self._handle_exit()
                 break
 
-            builder = None
-            tour = None
+            self._process_tour_choice(choice)
 
-            if choice == "1":
-                builder = EconomyTourBuilder()
-                director = TourDirector(builder)
-                tour = director.construct_economy_tour()
-                print("\nСформирован эконом-тур:")
+    def _handle_exit(self):
+        """Обработка выхода"""
+        print("Спасибо за обращение! До свидания!")
 
-            elif choice == "2":
-                builder = StandardTourBuilder()
-                director = TourDirector(builder)
-                tour = director.construct_standard_tour()
-                print("\nСформирован стандартный тур:")
+    def _process_tour_choice(self, choice):
+        """Обработка выбора тура"""
+        tour = None
+        tour_type = ""
 
-            elif choice == "3":
-                builder = LuxuryTourBuilder()
-                director = TourDirector(builder)
-                tour = director.construct_luxury_tour()
-                print("\nСформирован люкс-тур:")
+        if choice == "1":
+            tour = self._create_economy_tour()
+            tour_type = "эконом"
+        elif choice == "2":
+            tour = self._create_standard_tour()
+            tour_type = "стандартный"
+        elif choice == "3":
+            tour = self._create_luxury_tour()
+            tour_type = "люкс"
+        elif choice == "4":
+            tour = self.create_custom_tour()
+            tour_type = "индивидуальный"
 
-            elif choice == "4":
-                tour = self.create_custom_tour()
-                print("\nСформирован индивидуальный тур:")
+        if tour:
+            self._handle_tour_result(tour, tour_type)
 
-            if tour:
-                print(tour)
+    def _create_economy_tour(self):
+        """Создание эконом тура"""
+        builder = EconomyTourBuilder()
+        director = TourDirector(builder)
+        tour = director.construct_economy_tour()
+        print("\nСформирован эконом-тур:")
+        return tour
 
-                confirm = input("\nЖелаете оформить тур? (да/нет): ")
-                if confirm.lower() == "да":
-                    print("Тур успешно оформлен! Приятного отдыха!")
-                else:
-                    print("Оформление отменено")
+    def _create_standard_tour(self):
+        """Создание стандартного тура"""
+        builder = StandardTourBuilder()
+        director = TourDirector(builder)
+        tour = director.construct_standard_tour()
+        print("\nСформирован стандартный тур:")
+        return tour
+
+    def _create_luxury_tour(self):
+        """Создание люкс тура"""
+        builder = LuxuryTourBuilder()
+        director = TourDirector(builder)
+        tour = director.construct_luxury_tour()
+        print("\nСформирован люкс-тур:")
+        return tour
+
+    def _handle_tour_result(self, tour, tour_type):
+        """Обработка результата тура"""
+        print(tour)
+
+        confirm = input("\nЖелаете оформить тур? (да/нет): ")
+        if confirm.lower() == "да":
+            print("Тур успешно оформлен! Приятного отдыха!")
+        else:
+            print("Оформление отменено")
 
 
 if __name__ == "__main__":
