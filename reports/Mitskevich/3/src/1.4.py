@@ -583,7 +583,7 @@ class TravelAgency:
         print("\nСформирован люкс-тур:")
         return tour
 
-    def _handle_tour_result(self, tour, tour_type):
+    def _handle_tour_result(self, tour):
         """Обработка результата тура"""
         print(tour)
 

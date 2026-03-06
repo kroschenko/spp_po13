@@ -261,23 +261,29 @@ def process_command(fs, command_parts):
 
     cmd = command_parts[0].lower()
 
-    # Словарь команд
-    handlers = {
-        "exit": lambda: handle_exit(),
-        "help": lambda: handle_help(),
-        "ls": lambda: handle_ls(fs),
-        "pwd": lambda: handle_pwd(fs),
-        "tree": lambda: handle_tree(fs),
-        "cd": lambda: handle_cd(fs, command_parts),
-        "mkdir": lambda: handle_mkdir(fs, command_parts),
-        "touch": lambda: handle_touch(fs, command_parts),
-        "write": lambda: handle_write(fs, command_parts),
-        "read": lambda: handle_read(fs, command_parts),
-        "rm": lambda: handle_rm(fs, command_parts),
-    }
-
-    if cmd in handlers:
-        return handlers[cmd]()
+    # Словарь команд без лямбда
+    if cmd == "exit":
+        return handle_exit()
+    elif cmd == "help":
+        return handle_help()
+    elif cmd == "ls":
+        return handle_ls(fs)
+    elif cmd == "pwd":
+        return handle_pwd(fs)
+    elif cmd == "tree":
+        return handle_tree(fs)
+    elif cmd == "cd":
+        return handle_cd(fs, command_parts)
+    elif cmd == "mkdir":
+        return handle_mkdir(fs, command_parts)
+    elif cmd == "touch":
+        return handle_touch(fs, command_parts)
+    elif cmd == "write":
+        return handle_write(fs, command_parts)
+    elif cmd == "read":
+        return handle_read(fs, command_parts)
+    elif cmd == "rm":
+        return handle_rm(fs, command_parts)
 
     print(f"Неизвестная команда: {cmd}")
     return True
