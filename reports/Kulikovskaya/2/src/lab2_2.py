@@ -348,15 +348,15 @@ class Crew:
         else:
             print("В бригаде уже максимум пилотов (2)")
 
-    def set_navigator(self, navigator: Navigator):
-        self._navigator = navigator
-        navigator.is_available = False
-        print(f"Штурман {navigator.name} добавлен в бригаду {self._crew_id}")
+    def set_navigator(self, navigatorr: Navigator):
+        self._navigatorr = navigatorr
+        navigatorr.is_available = False
+        print(f"Штурман {navigatorr.name} добавлен в бригаду {self._crew_id}")
 
-    def set_radio_operator(self, radio_operator: RadioOperator):
-        self._radio_operator = radio_operator
-        radio_operator.is_available = False
-        print(f"Радист {radio_operator.name} добавлен в бригаду {self._crew_id}")
+    def set_radio_operator(self, radio_operatorr: RadioOperator):
+        self._radio_operator = radio_operatorr
+        radio_operatorr.is_available = False
+        print(f"Радист {radio_operatorr.name} добавлен в бригаду {self._crew_id}")
 
     def add_flight_attendant(self, flight_attendant: FlightAttendant):
         self._flight_attendants.append(flight_attendant)
@@ -435,13 +435,13 @@ class Flight:
     def status(self) -> str:
         return self._status
 
-    def assign_crew(self, crew: Crew):
+    def assign_crew(self, creww: Crew):
         # Назначение летной бригады на рейс
-        if not crew.is_complete():
-            print(f"Бригада {crew.crew_id} неполная!")
+        if not creww.is_complete():
+            print(f"Бригада {creww.crew_id} неполная!")
             return False
 
-        self._crew = crew
+        self._crew = creww
         print(f"Бригада назначена на рейс {self._flight_number}")
         return True
 
@@ -560,9 +560,9 @@ class Administrator:
         print(f"Администратор {self._name} начал формирование бригады {crew_id}")
         return new_crew
 
-    def assign_crew_to_flight(self, crew: Crew, current_flight: Flight):
+    def assign_crew_to_flight(self, crewww: Crew, current_flight: Flight):
         # Назначение бригады на рейс
-        if current_flight.assign_crew(crew):
+        if current_flight.assign_crew(crewww):
             print(f"Администратор назначил бригаду на рейс {current_flight.flight_number}")
 
     def cancel_flight(self, current_flight: Flight, reason: str):
