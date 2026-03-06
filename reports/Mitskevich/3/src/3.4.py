@@ -51,6 +51,37 @@ class IterableComponent(ABC):
         pass
 
 
+class FileSystemComponent(ABC):
+    """Абстрактный базовый класс для всех компонентов файловой системы"""
+
+    def __init__(self, name, date):
+        self._name = name
+        self._date = date
+
+    @abstractmethod
+    def getSize(self):
+        pass
+
+    @abstractmethod
+    def display(self, indent=""):
+        pass
+
+    def getName(self):
+        return self._name
+
+    def getDate(self):
+        return self._date
+
+    def add(self, component):
+        raise NotImplementedError("Сюда добавлять текст низя :( )")
+
+    def remove(self, component):
+        raise NotImplementedError("Удалить низя :( )")
+
+    def getChild(self, index):
+        raise NotImplementedError("Упс, что-то пошло не так *_* ")
+
+
 class Directory(FileSystemComponent, IterableComponent):
 
     def __init__(self, name, date):
