@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional
 
 
-# ========== БАЗОВЫЕ КЛАССЫ ==========
 class Bill(ABC):
     """Абстрактный счет"""
 
@@ -59,7 +57,6 @@ class Service:
         return f"{self.name} ({self.price} руб./мес)"
 
 
-# ========== ОСНОВНЫЕ КЛАССЫ ==========
 class Subscriber:
     """Абонент"""
 
@@ -69,8 +66,8 @@ class Subscriber:
         self.phone = phone
         self.balance = 0.0
         self.active = True
-        self.services = []  # агрегация
-        self.bills = []  # ассоциация
+        self.services = []
+        self.bills = []
 
     def add_service(self, service):
         if service not in self.services:
@@ -128,10 +125,9 @@ class Administrator:
 
     def __init__(self, name, station):
         self.name = name
-        self.station = station  # ассоциация
+        self.station = station
 
     def change_phone(self, subscriber, new_phone):
-        # Проверка, что номер не занят
         for sub in self.station.subscribers:
             if sub.phone == new_phone:
                 print(f"Ошибка: номер {new_phone} занят")
@@ -156,7 +152,7 @@ class Administrator:
     def block_subscriber(self, subscriber):
         if subscriber.get_debt() > 0:
             subscriber.active = False
-            print(f"Админ {self.name} заблокировал {subscriber.name} за долг {subscriber.get_debt()} руб.")
+            print(f"Админ {self.name} заблокировал {subscriber.name}")
             return True
         print(f"У {subscriber.name} нет долгов")
         return False
@@ -174,13 +170,13 @@ class Administrator:
 
 
 class PhoneStation:
-    """Телефонная станция (агрегация)"""
+    """Телефонная станция"""
 
     def __init__(self, name, call_rate=2.0):
         self.name = name
         self.call_rate = call_rate
-        self.subscribers = []  # агрегация
-        self.services = []  # агрегация
+        self.subscribers = []
+        self.services = []
 
     def add_subscriber(self, subscriber):
         if subscriber not in self.subscribers:
@@ -218,25 +214,21 @@ class PhoneStation:
         return f"Станция '{self.name}' ({len(self.subscribers)} абонентов)"
 
 
-# ========== ДЕМОНСТРАЦИЯ ==========
 def demo():
     print("-" * 50)
     print("ТЕЛЕФОННАЯ СТАНЦИЯ")
     print("-" * 50)
 
-    # 1. Создаем станцию
     station = PhoneStation("Мегафон", 1.5)
     admin = Administrator("Петров", station)
     print(f"Станция: {station}")
     print(f"Админ: {admin}")
 
-    # 2. Добавляем услуги
     print("\n--- Добавление услуг ---")
     station.add_service(Service("Интернет", 300))
     station.add_service(Service("ТВ", 200))
     station.add_service(Service("SMS", 150))
 
-    # 3. Создаем абонентов
     print("\n--- Регистрация абонентов ---")
     sub1 = Subscriber("001", "Иванов Иван", "111-111")
     sub2 = Subscriber("002", "Петров Петр", "222-222")
@@ -246,48 +238,38 @@ def demo():
     station.add_subscriber(sub2)
     station.add_subscriber(sub3)
 
-    # 4. Подключаем услуги
     print("\n--- Подключение услуг ---")
     admin.add_service(sub1, "Интернет")
     admin.add_service(sub1, "ТВ")
     admin.add_service(sub2, "SMS")
 
-    # 5. Совершаем звонки
     print("\n--- Звонки ---")
     sub1.make_call(10, station.call_rate)
     sub1.make_call(25, station.call_rate)
     sub2.make_call(5, station.call_rate)
 
-    # 6. Смена номера
     print("\n--- Смена номера ---")
     sub1.request_new_phone(admin, "999-999")
 
-    # 7. Проверка счетов
     print("\n--- Счета ---")
     for i, bill in enumerate(sub1.bills):
         print(f"  {i+1}. {bill}")
 
-    # 8. Оплата
     print("\n--- Оплата ---")
     sub1.pay_bill(0)
     sub1.pay_bill()
 
-    # 9. Блокировка за долги
     print("\n--- Блокировка ---")
     print(f"Долг {sub2.name}: {sub2.get_debt()} руб.")
     admin.block_subscriber(sub2)
 
-    # Попытка звонка с заблокированного
     sub2.make_call(1, station.call_rate)
 
-    # 10. Отказ от услуги
     print("\n--- Отказ от услуги ---")
     sub1.request_unsubscribe(admin, "ТВ")
 
-    # 11. Показываем состояние
     station.show_all()
 
-    # 12. Сравнение
     print("\n--- Сравнение ---")
     sub1_copy = Subscriber("001", "Иванов Иван", "999-999")
     print(f"sub1 == sub1_copy? {sub1 == sub1_copy}")
