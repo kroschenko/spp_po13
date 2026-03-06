@@ -21,7 +21,10 @@ class LimitedSet:
         return set(self.elements) == set(other.elements)
 
     def contains(self, value):
-        return float(value) in self.elements
+        try:
+            return float(value) in self.elements
+        except ValueError:
+            return False
 
     def add(self, value):
         try:
@@ -40,8 +43,6 @@ class LimitedSet:
             self.elements.remove(float(value))
         except ValueError:
             print(f"Элемент {value} не найден")
-        except (TypeError, ValueError):
-            print(f"Ошибка: {value} не является числом")
 
     def intersection(self, other):
         common = [x for x in self.elements if x in other.elements]
@@ -49,7 +50,7 @@ class LimitedSet:
 
 
 # Пример использования
-set1 = LimitedSet(5, [1.5, 2.7, 3.14, 2.7])  # Дубль 2.7 не добавится
+set1 = LimitedSet(5, [1.5, 2.7, 3.14, 2.7])
 set2 = LimitedSet(5, [2.7, 3.14, 5.5])
 
 print("Множество 1:", set1)
@@ -58,8 +59,8 @@ print("Множество 2:", set2)
 set1.add(4.8)
 print("После добавления 4.8:", set1)
 
-set1.add(4.8)  # Попытка добавить дубль
-set1.add(6.6)  # Попытка добавить при полной мощности (если 5 элементов)
+set1.add(4.8)
+set1.add(6.6)
 
 print("Содержит 2.7?", set1.contains(2.7))
 print("Содержит 9.9?", set1.contains(9.9))
