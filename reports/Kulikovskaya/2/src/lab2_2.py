@@ -492,7 +492,6 @@ class Flight:
             print("Нет назначенной бригады!")
             return
 
-
         print(f"ВЫПОЛНЕНИЕ РЕЙСА {self._flight_number}")
         print(f"Маршрут: {self._departure_airport.city} -> {self._destination_airport.city}")
         print(f"Самолет: {self._aircraft}")
