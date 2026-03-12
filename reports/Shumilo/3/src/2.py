@@ -114,12 +114,10 @@ def interactive_menu(root):
             print(f"Сотрудник {name} удалён.")
         elif choice == "4":
             generate_salary_report(root)
-
         elif choice == "0":
             print("Выход из программы.")
             break
-        else:
-            print("Некорректный ввод. Попробуйте снова.")
+       
 
 if __name__ == "__main__":
 
