@@ -152,43 +152,41 @@ class FileSystem:
         """Получение текущего пути"""
         return "/" + "/".join(self._current_path)
 
+    def change_directory(self, dir_name):
+        """Смена текущей директории"""
+        if dir_name == "..":
+            self._go_to_parent_directory()
+            return
 
-def change_directory(self, dir_name):
-    """Смена текущей директории"""
-    if dir_name == "..":
-        self._go_to_parent_directory()
-        return
-
-    self._go_to_child_directory(dir_name)
-
-
-def _go_to_parent_directory(self):
-    """Переход в родительскую директорию"""
-    if len(self._current_path) <= 1:
-        print("Уже в корневой директории")
-        return
-
-    self._current_path.pop()
-    self._current_directory = self._root
-
-    for dir_name_item in self._current_path[1:]:
-        next_dir = self._current_directory.find_by_name(dir_name_item)
-        if next_dir and isinstance(next_dir, Directory):
-            self._current_directory = next_dir
-
-    print(f"Перешли в директорию {self.get_current_path()}")
+        self._go_to_child_directory(dir_name)
 
 
-def _go_to_child_directory(self, dir_name):
-    """Переход в дочернюю директорию"""
-    target = self._current_directory.find_by_name(dir_name)
+    def _go_to_parent_directory(self):
+        """Переход в родительскую директорию"""
+        if len(self._current_path) <= 1:
+            print("Уже в корневой директории")
+            return
 
-    if target and isinstance(target, Directory):
-        self._current_directory = target
-        self._current_path.append(dir_name)
-        print(f"Перешли в папочку {self.get_current_path()}")
-    else:
-        print(f"Папка '{dir_name}' не найдена, плак плак ((( )")
+        self._current_path.pop()
+        self._current_directory = self._root
+
+        for dir_name_item in self._current_path[1:]:
+            next_dir = self._current_directory.find_by_name(dir_name_item)
+            if next_dir and isinstance(next_dir, Directory):
+                self._current_directory = next_dir
+
+        print(f"Перешли в директорию {self.get_current_path()}")
+
+    def _go_to_child_directory(self, dir_name):
+        """Переход в дочернюю директорию"""
+        target = self._current_directory.find_by_name(dir_name)
+
+        if target and isinstance(target, Directory):
+            self._current_directory = target
+            self._current_path.append(dir_name)
+            print(f"Перешли в папочку {self.get_current_path()}")
+        else:
+            print(f"Папка '{dir_name}' не найдена, плак плак ((( )")
 
     def create_file(self, file_name, extension):
         """Создание файла в текущей папке"""

@@ -541,7 +541,6 @@ class TravelAgency:
     def _process_tour_choice(self, choice):
         """Обработка выбора тура"""
         tour = None
-        tour_type = ""
 
         if choice == "1":
             tour = self._create_economy_tour()
