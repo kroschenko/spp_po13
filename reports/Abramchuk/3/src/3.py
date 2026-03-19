@@ -1,62 +1,69 @@
-# Command (Команда)
+# Strategy (Стратегия)
 
 from abc import ABC, abstractmethod
 
-class Command(ABC):
+# Абстрактный класс стратегии
+class Strategy(ABC):
     @abstractmethod
     def execute(self):
         pass
 
-class OneCommand(Command):
-    def execute(self):
-        return 1
+# Конкретные стратегии
+class NumberStrategy(Strategy):
+    def __init__(self, value):
+        self.value = value
 
-class TwoCommand(Command):
     def execute(self):
-        return 2
+        return self.value
 
-class AddCommand(Command):
+class AddStrategy(Strategy):
     def execute(self):
         return "Выполняю сложение"
 
-class SubCommand(Command):
+class SubStrategy(Strategy):
     def execute(self):
         return "Выполняю вычитание"
 
-class SinCommand(Command):
+class SinStrategy(Strategy):
     def execute(self):
         return "Вычисляю синус"
 
-class CleanHistoryCommand(Command):
+class CleanHistoryStrategy(Strategy):
     def execute(self):
         return "Очищаю историю операций"
 
-class Button:
-    def __init__(self, label):
-        self.label = label
-        self.command = None
-
-    def set_command(self, command: Command):
-        self.command = command
+# Кнопки
+class Button(ABC):
+    def __init__(self, label: str, strategy: Strategy):
+        self._label = label
+        self._strategy = strategy
 
     def click(self):
-        if self.command:
-            print(f"Кнопка {self.label}: {self.command.execute()}")
+        if self._strategy:
+            print(f"Кнопка {self._label}: {self._strategy.execute()}")
         else:
-            print(f"Кнопка {self.label} пока не настроена.")
+            print(f"Кнопка {self._label} не имеет функции")
+
+class CustomButton(Button):
+    def __init__(self, _label: str, strategy: Strategy = None):
+        super().__init__(_label, strategy)
+
+    def set_strategy(self, strategy: Strategy):
+        self._strategy = strategy
+        print(f"Кнопка {self._label}: Назначение изменилось")
 
 
-btn_plus = Button("+")
-btn_one = Button("1")
-btn_custom = Button("F1")
+btn_plus = Button("+", AddStrategy())
+btn_one = Button("1", NumberStrategy(1))
+btn_two = Button("2", NumberStrategy(2))
 
-btn_plus.set_command(AddCommand())
-btn_one.set_command(OneCommand())
-btn_custom.set_command(CleanHistoryCommand())
+btn_custom = CustomButton("F1", CleanHistoryStrategy())
 
 btn_plus.click()
 btn_one.click()
 btn_custom.click()
 
-btn_custom.set_command(SinCommand())
+print()
+
+btn_custom.set_strategy(SinStrategy())
 btn_custom.click()
