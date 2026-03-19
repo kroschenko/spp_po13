@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 from datetime import date
 from sqlalchemy import create_engine, Column, Integer, String, Float, Date, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -68,8 +69,8 @@ class BuildComponent(Base):
 
 
 Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-session = Session()
+SESSION_MAKER = sessionmaker(bind=engine)
+session = SESSION_MAKER()
 
 print("Подключение к БД через SQLAlchemy успешно установлено!")
 

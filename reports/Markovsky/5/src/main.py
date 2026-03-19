@@ -1,8 +1,16 @@
+from datetime import date
 from typing import Optional, List
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from sqlalchemy_db import *
+from sqlalchemy_db import (
+    add_manufacturer, get_all_manufacturers, update_manufacturer_country, delete_manufacturer,
+    add_category,
+    add_component, get_all_components, get_components_by_category,
+    update_component_price, update_component_quantity, delete_component,
+    add_build, get_build_details, delete_build,
+    add_component_to_build
+)
 
 app = FastAPI(title="Компьютерная сборка API")
 
@@ -73,7 +81,7 @@ def create_manufacturer(manufacturer: ManufacturerCreate):
         )
         return new_manufacturer
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.get("/manufacturers/", response_model=List[ManufacturerResponse])
@@ -88,7 +96,7 @@ def update_manufacturer_country_endpoint(manufacturer_id: int, new_country: str)
         update_manufacturer_country(manufacturer_id, new_country)
         return {"message": "Страна производителя обновлена"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.delete("/manufacturers/{manufacturer_id}")
@@ -97,7 +105,7 @@ def delete_manufacturer_endpoint(manufacturer_id: int):
         delete_manufacturer(manufacturer_id)
         return {"message": "Производитель удален"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.post("/categories/", response_model=CategoryResponse)
@@ -109,7 +117,7 @@ def create_category(category: CategoryCreate):
         )
         return new_category
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.post("/components/", response_model=ComponentResponse)
@@ -124,7 +132,7 @@ def create_component(component: ComponentCreate):
         )
         return new_component
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.get("/components/", response_model=List[ComponentResponse])
@@ -145,7 +153,7 @@ def update_component_price_endpoint(component_id: int, new_price: float):
         update_component_price(component_id, new_price)
         return {"message": "Цена компонента обновлена"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.put("/components/{component_id}/quantity")
@@ -154,7 +162,7 @@ def update_component_quantity_endpoint(component_id: int, new_quantity: int):
         update_component_quantity(component_id, new_quantity)
         return {"message": "Количество компонента обновлено"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.delete("/components/{component_id}")
@@ -163,7 +171,7 @@ def delete_component_endpoint(component_id: int):
         delete_component(component_id)
         return {"message": "Компонент удален"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.post("/builds/", response_model=BuildResponse)
@@ -176,7 +184,7 @@ def create_build(build: BuildCreate):
         )
         return new_build
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.get("/builds/{build_id}", response_model=BuildDetailResponse)
@@ -208,7 +216,7 @@ def delete_build_endpoint(build_id: int):
         delete_build(build_id)
         return {"message": "Сборка удалена"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.post("/build-components/", response_model=BuildComponentResponse)
@@ -221,7 +229,7 @@ def add_component_to_build_endpoint(bc: BuildComponentCreate):
         )
         return new_bc
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 if __name__ == "__main__":
