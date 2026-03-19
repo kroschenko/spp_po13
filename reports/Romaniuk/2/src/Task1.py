@@ -1,22 +1,18 @@
 class RealSet:
-    def __init__(self, max_size=10, elements=None):
-        self._max_size = max_size
+
+    def __init__(self, elements=None):
         self._data = []
         if elements:
-            for e in elements:
-                self.add(e)
+            for element in elements:
+                self.add(element)
 
-    def get_size(self):
+    @property
+    def size(self):
         return len(self._data)
 
-    def get_max_size(self):
-        return self._max_size
-
-    def set_max_size(self, value):
-        if value < len(self._data):
-            print("Ошибка: новый размер меньше текущего количества элементов")
-        else:
-            self._max_size = value
+    @property
+    def data(self):
+        return self._data.copy()
 
     def __str__(self):
         return "{" + ", ".join([str(round(x, 2)) for x in self._data]) + "}"
@@ -24,22 +20,19 @@ class RealSet:
     def __eq__(self, other):
         if not isinstance(other, RealSet):
             return False
-        return sorted(self._data) == sorted(other.get_data())
+        return sorted(self._data) == sorted(other.data)
 
     def contains(self, x):
-        return x in self._data
-
-    def get_data(self):
-        return self._data.copy()
+        try:
+            return float(x) in self._data
+        except ValueError:
+            return False
 
     def add(self, x):
         try:
             num = float(x)
             if num not in self._data:
-                if len(self._data) < self._max_size:
-                    self._data.append(num)
-                else:
-                    print(f"Ошибка: достигнут максимум ({self._max_size} элементов)")
+                self._data.append(num)
             else:
                 print(f"Элемент {num} уже существует")
         except ValueError:
@@ -51,21 +44,61 @@ class RealSet:
         except ValueError:
             print(f"Элемент {x} не найден")
 
-    def union(self, other):
-        new_max = max(self._max_size, other.get_max_size())
-        new_data = list(set(self._data + other.get_data()))
-        return RealSet(new_max, new_data[:new_max])
+    def union(self, other_set):
+        if not isinstance(other_set, RealSet):
+            print("Ошибка: аргумент должен быть объектом RealSet")
+            return None
+
+        new_data = list(set(self._data + other_set.data))
+        return RealSet(new_data)
 
 
-a = RealSet(5, [1.5, 2.3, 3.7])
-b = RealSet(3, [2.3, 4.1])
-print(f"A: {a}, размер: {a.get_size()}/{a.get_max_size()}")
-a.add(5.5)
-a.add(1.5)
-print(f"A после добавлений: {a}")
-print(f"2.3 в A? {a.contains(2.3)}")
-c = a.union(b)
-print(f"Объединение A и B: {c}")
-a.remove(2.3)
-print(f"A после удаления: {a}")
-print(f"A == RealSet(5, [1.5, 3.7, 5.5])? {a == RealSet(5, [1.5, 3.7, 5.5])}")
+print("=== Множество вещественных чисел (переменной мощности) ===\n")
+
+set_a = RealSet([1.5, 2.3, 3.7])
+set_b = RealSet([2.3, 4.1])
+
+print(f"A: {set_a}, размер: {set_a.size}")
+print(f"B: {set_b}, размер: {set_b.size}")
+
+print("\n=== Тест добавления ===")
+set_a.add(5.5)
+set_a.add(1.5)
+set_a.add(7.8)
+set_a.add(9.2)
+print(f"A после добавлений: {set_a}, размер: {set_a.size}")
+
+print("\n=== Тест contains ===")
+print(f"2.3 в A? {set_a.contains(2.3)}")
+print(f"10.0 в A? {set_a.contains(10.0)}")
+
+print("\n=== Тест объединения ===")
+set_c = set_a.union(set_b)
+print(f"A: {set_a}")
+print(f"B: {set_b}")
+print(f"Объединение A ∪ B: {set_c}, размер: {set_c.size}")
+
+print("\n=== Тест удаления ===")
+set_a.remove(2.3)
+print(f"A после удаления 2.3: {set_a}, размер: {set_a.size}")
+set_a.remove(15.0)
+
+print("\n=== Тест __eq__ ===")
+set_d = RealSet([1.5, 3.7, 5.5, 7.8, 9.2])
+print(f"A: {set_a}")
+print(f"D: {set_d}")
+print(f"A == D? {set_a == set_d}")
+
+set_e = RealSet([1.5, 5.5, 3.7, 7.8, 9.2])
+print(f"E: {set_e}")
+print(f"A == E? {set_a == set_e}")
+
+print("\n=== Тест с пустым множеством ===")
+empty_set = RealSet()
+print(f"Пустое множество: {empty_set}, размер: {empty_set.size}")
+empty_set.add(10.5)
+print(f"После добавления: {empty_set}, размер: {empty_set.size}")
+
+print("\n=== Тест с отрицательными числами ===")
+set_f = RealSet([-1.5, -2.7, 0, 3.14])
+print(f"F: {set_f}, размер: {set_f.size}")
