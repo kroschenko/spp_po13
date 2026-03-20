@@ -3,8 +3,6 @@ from typing import Dict, List, Callable, Optional
 import math
 
 
-# Контекст - Калькулятор
-
 class Calculator:
     def __init__(self):
         self._display = "0"
@@ -18,7 +16,7 @@ class Calculator:
         self._setup_default_strategies()
 
     def _setup_default_strategies(self):
-        """Настройка стратегий по умолчанию"""
+        # Настройка стратегий по умолчанию
         # Цифровые кнопки (0-9) - фиксированная функция
         for i in range(10):
             self._button_strategies[str(i)] = DigitButtonStrategy(str(i))
@@ -43,7 +41,7 @@ class Calculator:
         return self._display
 
     def press_button(self, button: str) -> str:
-        """Нажатие кнопки - делегирование стратегии"""
+        # Нажатие кнопки - делегирование стратегии
         strategy = self._button_strategies.get(button)
         if not strategy:
             return f"Кнопка '{button}' не назначена"
@@ -52,19 +50,19 @@ class Calculator:
         return resultt
 
     def set_button_strategy(self, button: str, strategy: 'ButtonStrategy'):
-        """Изменение назначения кнопки (смена стратегии)"""
+        # Изменение назначения кнопки (смена стратегии)
         self._button_strategies[button] = strategy
         return f"Кнопка '{button}' переназначена: {strategy.get_description()}"
 
     def get_button_info(self, button: str) -> str:
-        """Получение информации о назначении кнопки"""
+        # Получение информации о назначении кнопки
         strategy = self._button_strategies.get(button)
         if strategy:
             return f"{button}: {strategy.get_description()}"
         return f"{button}: [не назначена]"
 
     def get_all_buttons(self) -> List[str]:
-        """Получение списка всех кнопок"""
+        # Получение списка всех кнопок
         return list(self._button_strategies.keys())
 
     # Методы для работы со стратегиями
@@ -115,6 +113,10 @@ class Calculator:
             self._operation = None
             self._waiting_for_operand = True
             return self._display
+        except ZeroDivisionError:
+            return "Error: Division by zero"
+        except ValueError:
+            return "Error: Invalid value"
         except Exception as e:
             return f"Error: {str(e)}"
 
@@ -135,32 +137,30 @@ class Calculator:
         self._memory = 0.0
 
     def scientific_operation(self, func: str) -> str:
-        """Выполнение научной операции"""
+        # Выполнение научной операции
         value = self.get_display_value()
 
-        try:
-            if func == "sqrt":
-                if value < 0:
-                    return "Error: Negative sqrt"
-                result = value ** 0.5
-            elif func == "pow2":
-                result = value ** 2
-            elif func == "sin":
-                result = math.sin(math.radians(value))
-            elif func == "cos":
-                result = math.cos(math.radians(value))
-            elif func == "log":
-                if value <= 0:
-                    return "Error: Log of non-positive"
-                result = math.log10(value)
-            elif func == "ln":
-                if value <= 0:
-                    return "Error: Ln of non-positive"
-                result = math.log(value)
-            else:
-                return f"Error: Unknown function {func}"
+        # Проверки на корректность
+        if func in ["sqrt", "log", "ln"] and value <= 0:
+            return f"Error: Invalid value for {func}"
 
-            self._display = str(result)
+        # Словарь операций вместо if-elif
+        operations = {
+            "sqrt": lambda v: v ** 0.5,
+            "pow2": lambda v: v ** 2,
+            "sin": lambda v: math.sin(math.radians(v)),
+            "cos": lambda v: math.cos(math.radians(v)),
+            "log": lambda v: math.log10(v),
+            "ln": lambda v: math.log(v)
+        }
+
+        operation = operations.get(func)
+        if not operation:
+            return f"Error: Unknown function {func}"
+
+        try:
+            rresult = operation(value)
+            self._display = str(rresult)
             self._waiting_for_operand = True
             return self._display
         except Exception as e:
@@ -232,10 +232,10 @@ class MemoryButtonStrategy(ButtonStrategy):
         if self._mem_op == "M+":
             calculator.memory_add()
             return f"M+ ({calculator.display})"
-        elif self._mem_op == "MR":
+        if self._mem_op == "MR":
             calculator.memory_recall()
             return calculator.display
-        elif self._mem_op == "MC":
+        if self._mem_op == "MC":
             calculator.memory_clear()
             return "Memory cleared"
         return "Unknown memory op"
@@ -392,7 +392,7 @@ if __name__ == "__main__":
 
     print("Демонстрация завершена!")
     print("Паттерн Стратегия позволил:")
-    print("  • Иметь фиксированные кнопки (цифры, операции)")
-    print("  • Изменять назначение функциональных кнопок")
-    print("  • Создавать пользовательские функции")
-    print("  • Менять поведение кнопок во время работы")
+    print("- Иметь фиксированные кнопки (цифры, операции)")
+    print("- Изменять назначение функциональных кнопок")
+    print("- Создавать пользовательские функции")
+    print("- Менять поведение кнопок во время работы")
