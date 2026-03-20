@@ -1,6 +1,4 @@
 """Поиск подстроки в строке (аналог str.find)."""
-# pylint: disable=invalid-name
-
 
 def str_str(haystack: str, needle: str) -> int:
     """Возвращает индекс первого вхождения needle в haystack или -1."""
