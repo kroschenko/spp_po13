@@ -36,26 +36,22 @@ class IdleState(PrinterState):
     def print_document(self, pages):
         print(f"\nПопытка печати {pages} стр. в состоянии ОЖИДАНИЕ")
 
-        # Проверка наличия бумаги
         if self.printer.paper_sheets < pages:
             print(f"  Недостаточно бумаги! (есть: {self.printer.paper_sheets}, нужно: {pages})")
             self.printer.set_state(OutOfPaperState(self.printer))
             return False
 
-        # Проверка наличия краски
         ink_needed = pages * 2
         if self.printer.ink_level < ink_needed:
             print(f"  Недостаточно краски! (есть: {self.printer.ink_level}%, нужно: {ink_needed}%)")
             self.printer.set_state(OutOfInkState(self.printer))
             return False
 
-        # Проверка вероятности зажатия (5%)
         if random.random() < self.printer.jam_probability:
-            print("  ПРОИЗОШЛО ЗАЖАТИЕ БУМАГИ!")  # Убрал f-строку
+            print("  ПРОИЗОШЛО ЗАЖАТИЕ БУМАГИ!")
             self.printer.set_state(JammedState(self.printer))
             return False
 
-        # Начинаем печать
         self.printer.set_state(PrintingState(self.printer))
         return self.printer.current_state.print_document(pages)
 
@@ -93,13 +89,12 @@ class PrintingState(PrinterState):
             self.printer.paper_sheets -= 1
             self.printer.ink_level -= 2
 
-            # Маленькая вероятность зажатия (2%)
             if random.random() < self.printer.jam_probability / 2:
                 print(f"  ЗАЖАТИЕ БУМАГИ на странице {page}!")
                 self.printer.set_state(JammedState(self.printer))
                 return False
 
-        print("  Печать завершена")  # Убрал f-строку
+        print("  Печать завершена")
         self.printer.set_state(IdleState(self.printer))
         return True
 
@@ -145,7 +140,7 @@ class JammedState(PrinterState):
     def refill_ink(self, percent):
         print("\nЗаправка картриджа при ЗАЖАТИИ")
         self.printer.ink_level = min(100, self.printer.ink_level + percent)
-        print("  Картридж заправлен, зажатие осталось")  # Убрал f-строку
+        print("  Картридж заправлен, зажатие осталось")
         return True
 
     def get_state_name(self):
@@ -213,9 +208,9 @@ class OutOfInkState(PrinterState):
 class Printer:
     def __init__(self, model):
         self.model = model
-        self.paper_sheets = 100  # Начинаем с 100 листов
-        self.ink_level = 100  # Начинаем с 100% краски
-        self.jam_probability = 0.03  # 3% вероятность зажатия
+        self.paper_sheets = 100
+        self.ink_level = 100
+        self.jam_probability = 0.03
         self.current_state = IdleState(self)
         self.total_printed = 0
         self.jams_fixed = 0
@@ -275,6 +270,63 @@ class Printer:
         print("-" * 50)
 
 
+def demo_normal_print(printer):
+    """Демонстрация обычной печати"""
+    print("\n" + "*" * 40)
+    print("1. ОБЫЧНАЯ ПЕЧАТЬ")
+    print("*" * 40)
+    printer.print_document(5)
+
+
+def demo_second_print(printer):
+    """Демонстрация второй печати"""
+    print("\n" + "*" * 40)
+    print("2. ВТОРОЙ ДОКУМЕНТ")
+    print("*" * 40)
+    printer.print_document(3)
+
+
+def demo_print_until_no_paper(printer):
+    """Демонстрация печати до конца бумаги"""
+    print("\n" + "*" * 40)
+    print("3. ПЕЧАТЬ ДО КОНЦА БУМАГИ")
+    print("*" * 40)
+    printer.print_document(100)
+
+
+def demo_load_paper(printer):
+    """Демонстрация загрузки бумаги"""
+    print("\n" + "*" * 40)
+    print("4. ЗАГРУЗКА БУМАГИ")
+    print("*" * 40)
+    printer.load_paper(50)
+
+
+def demo_print_until_no_ink(printer):
+    """Демонстрация печати до конца краски"""
+    print("\n" + "*" * 40)
+    print("5. ПЕЧАТЬ ДО КОНЦА КРАСКИ")
+    print("*" * 40)
+    for _ in range(5):
+        printer.print_document(10)
+
+
+def demo_refill_ink(printer):
+    """Демонстрация заправки картриджа"""
+    print("\n" + "*" * 40)
+    print("6. ЗАПРАВКА КАРТРИДЖА")
+    print("*" * 40)
+    printer.refill_ink(100)
+
+
+def demo_final_print(printer):
+    """Финальная печать"""
+    print("\n" + "*" * 40)
+    print("7. ФИНАЛЬНАЯ ПЕЧАТЬ")
+    print("*" * 40)
+    printer.print_document(7)
+
+
 def demo():
     print("=" * 60)
     print("ПРОЕКТ ПРИНТЕР (ПАТТЕРН: СОСТОЯНИЕ)")
@@ -282,48 +334,13 @@ def demo():
 
     printer = Printer("HP LaserJet 1018")
 
-    # 1. Успешная печать
-    print("\n" + "*" * 40)
-    print("1. ОБЫЧНАЯ ПЕЧАТЬ")
-    print("*" * 40)
-    printer.print_document(5)
-
-    # 2. Еще печать
-    print("\n" + "*" * 40)
-    print("2. ВТОРОЙ ДОКУМЕНТ")
-    print("*" * 40)
-    printer.print_document(3)
-
-    # 3. Печать пока не кончится бумага
-    print("\n" + "*" * 40)
-    print("3. ПЕЧАТЬ ДО КОНЦА БУМАГИ")
-    print("*" * 40)
-    printer.print_document(100)  # Бумаги 92 после первых двух печатей
-
-    # 4. Загрузка бумаги
-    print("\n" + "*" * 40)
-    print("4. ЗАГРУЗКА БУМАГИ")
-    print("*" * 40)
-    printer.load_paper(50)
-
-    # 5. Печать пока не кончится краска
-    print("\n" + "*" * 40)
-    print("5. ПЕЧАТЬ ДО КОНЦА КРАСКИ")
-    print("*" * 40)
-    for _ in range(5):  # Изменил i на _
-        printer.print_document(10)
-
-    # 6. Заправка картриджа
-    print("\n" + "*" * 40)
-    print("6. ЗАПРАВКА КАРТРИДЖА")
-    print("*" * 40)
-    printer.refill_ink(100)
-
-    # 7. Финальная печать
-    print("\n" + "*" * 40)
-    print("7. ФИНАЛЬНАЯ ПЕЧАТЬ")
-    print("*" * 40)
-    printer.print_document(7)
+    demo_normal_print(printer)
+    demo_second_print(printer)
+    demo_print_until_no_paper(printer)
+    demo_load_paper(printer)
+    demo_print_until_no_ink(printer)
+    demo_refill_ink(printer)
+    demo_final_print(printer)
 
     print("\n" + "=" * 60)
     print("ИТОГ")
