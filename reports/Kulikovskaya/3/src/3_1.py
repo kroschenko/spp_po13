@@ -247,7 +247,7 @@ class CoffeeStation:
             "mocha": "Шоколадная мокка"
         }
 
-        for key in self._machines.keys():
+        for key in self._machines:
             menu += f"• {key.title():12} - {descriptions[key]}\n"
 
         return menu
@@ -279,5 +279,5 @@ if __name__ == "__main__":
 
     print("ИТОГОВАЯ СТАТИСТИКА")
 
-    for machine in sstation.get_machines().values():
-        print(machine.get_stats())
+    for mmachine in sstation.get_machines().values():
+        print(mmachine.get_stats())
