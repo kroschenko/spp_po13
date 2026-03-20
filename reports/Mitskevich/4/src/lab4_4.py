@@ -1,9 +1,9 @@
 import os
-from github import Github
-from dotenv import load_dotenv
+from datetime import datetime, timedelta, timezone
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import datetime, timedelta, timezone
+from github import Github
+from dotenv import load_dotenv
 
 # Авторизация через Personal Access Token (PAT)
 # Загружаем переменные из .env
