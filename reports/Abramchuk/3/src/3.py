@@ -2,11 +2,13 @@
 
 from abc import ABC, abstractmethod
 
+
 # Абстрактный класс стратегии
 class Strategy(ABC):
     @abstractmethod
     def execute(self):
         pass
+
 
 # Конкретные стратегии
 class NumberStrategy(Strategy):
@@ -16,21 +18,26 @@ class NumberStrategy(Strategy):
     def execute(self):
         return self.value
 
+
 class AddStrategy(Strategy):
     def execute(self):
         return "Выполняю сложение"
+
 
 class SubStrategy(Strategy):
     def execute(self):
         return "Выполняю вычитание"
 
+
 class SinStrategy(Strategy):
     def execute(self):
         return "Вычисляю синус"
 
+
 class CleanHistoryStrategy(Strategy):
     def execute(self):
         return "Очищаю историю операций"
+
 
 # Кнопки
 class Button(ABC):
@@ -43,6 +50,7 @@ class Button(ABC):
             print(f"Кнопка {self._label}: {self._strategy.execute()}")
         else:
             print(f"Кнопка {self._label} не имеет функции")
+
 
 class CustomButton(Button):
     def __init__(self, _label: str, strategy: Strategy = None):

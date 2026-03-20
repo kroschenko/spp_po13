@@ -2,10 +2,12 @@
 
 from abc import ABC, abstractmethod
 
+
 class IDigitalClock(ABC):
     @abstractmethod
     def get_time(self) -> str:
         pass
+
 
 class DigitalClock(IDigitalClock):
     def __init__(self, time):
@@ -14,6 +16,7 @@ class DigitalClock(IDigitalClock):
     def get_time(self) -> str:
         return self.time
 
+
 class ClockWithHands:
     def __init__(self, hour_angle, minute_angle):
         self.hour_angle = hour_angle
@@ -21,6 +24,7 @@ class ClockWithHands:
 
     def get_time_angles(self) -> str:
         return f"{self.hour_angle}, {self.minute_angle}"
+
 
 class ClockAdapter(IDigitalClock):
     def __init__(self, clock_with_hands: ClockWithHands):

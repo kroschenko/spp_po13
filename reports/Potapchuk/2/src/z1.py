@@ -12,9 +12,7 @@ class IntegerSet:
             self.elements = []
         else:
             seen = set()
-            self.elements = [
-                x for x in initial_elements if not (x in seen or seen.add(x))
-            ]
+            self.elements = [x for x in initial_elements if not (x in seen or seen.add(x))]
 
     def add(self, element):
         """Add an integer to the set if it is not already present."""

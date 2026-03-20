@@ -87,10 +87,7 @@ class Store:
         total = order.total_cost()
 
         if order.customer.balance < total:
-            print(
-                f"Customer {order.customer.name} has insufficient funds "
-                f"({order.customer.balance} < {total})."
-            )
+            print(f"Customer {order.customer.name} has insufficient funds " f"({order.customer.balance} < {total}).")
             return
 
         order.customer.balance -= total
@@ -145,10 +142,7 @@ def main():
 
     print("\n=== Final balances ===")
     for customer in customers:
-        print(
-            f"  {customer.name:8}  balance: ${customer.balance:6.2f}  "
-            f"blacklisted: {customer.is_blacklisted}"
-        )
+        print(f"  {customer.name:8}  balance: ${customer.balance:6.2f}  " f"blacklisted: {customer.is_blacklisted}")
 
 
 if __name__ == "__main__":
