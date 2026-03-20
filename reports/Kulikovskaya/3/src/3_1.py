@@ -5,7 +5,7 @@ from typing import Dict
 
 @dataclass
 class CoffeeRecipe:
-    """Рецепт кофейного напитка"""
+    # Рецепт кофейного напитка
     name: str
     water_ml: int
     coffee_g: int
@@ -19,7 +19,7 @@ class CoffeeRecipe:
 
 
 class Coffee(ABC):
-    """Абстрактный класс кофейного напитка"""
+    # Абстрактный класс кофейного напитка
 
     def __init__(self, recipe: CoffeeRecipe):
         self._recipe = recipe
@@ -43,7 +43,6 @@ class Coffee(ABC):
 # Конкретные продукты (5 классов напитков)
 
 class Espresso(Coffee):
-    """Эспрессо"""
 
     def prepare(self) -> str:
         self._is_prepared = True
@@ -58,7 +57,6 @@ class Espresso(Coffee):
 
 
 class Cappuccino(Coffee):
-    """Капучино"""
 
     def prepare(self) -> str:
         self._is_prepared = True
@@ -74,7 +72,6 @@ class Cappuccino(Coffee):
 
 
 class Latte(Coffee):
-    """Латте"""
 
     def prepare(self) -> str:
         self._is_prepared = True
@@ -90,7 +87,6 @@ class Latte(Coffee):
 
 
 class Americano(Coffee):
-    """Американо"""
 
     def prepare(self) -> str:
         self._is_prepared = True
@@ -105,7 +101,7 @@ class Americano(Coffee):
 
 
 class Mocha(Coffee):
-    """Мокка (шоколадный кофе)"""
+    # Мокка (шоколадный кофе)
 
     def prepare(self) -> str:
         self._is_prepared = True
@@ -124,7 +120,7 @@ class Mocha(Coffee):
 # Фабрики (Factory Method)
 
 class CoffeeMachine(ABC):
-    """Абстрактный класс кофе-машины (Создатель)"""
+    # Абстрактный класс кофе-машины (Создатель)
 
     def __init__(self, machine_id: str, location: str):
         self._machine_id = machine_id
@@ -146,7 +142,7 @@ class CoffeeMachine(ABC):
 
 
 class EspressoMachine(CoffeeMachine):
-    """Машина для эспрессо"""
+    # Машина для эспрессо
 
     def create_coffee(self, sizee: str = "medium") -> Coffee:
         recipes = {
@@ -158,7 +154,7 @@ class EspressoMachine(CoffeeMachine):
 
 
 class CappuccinoMachine(CoffeeMachine):
-    """Машина для капучино"""
+    # Машина для капучино
 
     def create_coffee(self, sizee: str = "medium") -> Coffee:
         recipes = {
@@ -170,7 +166,7 @@ class CappuccinoMachine(CoffeeMachine):
 
 
 class LatteMachine(CoffeeMachine):
-    """Машина для латте"""
+    # Машина для латте
 
     def create_coffee(self, sizee: str = "medium") -> Coffee:
         recipes = {
@@ -182,7 +178,7 @@ class LatteMachine(CoffeeMachine):
 
 
 class AmericanoMachine(CoffeeMachine):
-    """Машина для американо"""
+    # Машина для американо
 
     def create_coffee(self, sizee: str = "medium") -> Coffee:
         recipes = {
@@ -194,7 +190,7 @@ class AmericanoMachine(CoffeeMachine):
 
 
 class MochaMachine(CoffeeMachine):
-    """Машина для мокки"""
+    # Машина для мокки
 
     def create_coffee(self, sizee: str = "medium") -> Coffee:
         recipes = {
@@ -208,14 +204,14 @@ class MochaMachine(CoffeeMachine):
 # Универсальная кофе-станция
 
 class CoffeeStation:
-    """Кофе-станция с различными машинами"""
+    # Кофе-станция с различными машинами
 
     def __init__(self):
         self._machines: Dict[str, CoffeeMachine] = {}
         self._setup_machines()
 
     def _setup_machines(self):
-        """Настройка всех типов машин"""
+        # Настройка всех типов машин
         self._machines["espresso"] = EspressoMachine("ESP-001", "Зал ожидания")
         self._machines["cappuccino"] = CappuccinoMachine("CAP-001", "Зал ожидания")
         self._machines["latte"] = LatteMachine("LAT-001", "VIP-зал")
@@ -223,7 +219,7 @@ class CoffeeStation:
         self._machines["mocha"] = MochaMachine("MCH-001", "Кафе")
 
     def order_coffee(self, coffee_type: str, sizee: str = "medium") -> str:
-        """Заказ кофе определенного типа"""
+        # Заказ кофе определенного типа
         machine = self._machines.get(coffee_type.lower())
         if not machine:
             available = ", ".join(self._machines.keys())
@@ -235,8 +231,12 @@ class CoffeeStation:
         resultt = machine.make_coffee(sizee)
         return resultt
 
+    def get_machines(self) -> Dict[str, CoffeeMachine]:
+        # Получить копию словаря машиy
+        return self._machines.copy()
+
     def get_menu(self) -> str:
-        """Получение меню"""
+        # Получение меню
         menu = "\nМЕНЮ КОФЕ-СТАНЦИИ\n"
 
         descriptions = {
@@ -247,13 +247,12 @@ class CoffeeStation:
             "mocha": "Шоколадная мокка"
         }
 
-        for key, machine in self._machines.items():
+        for key in self._machines.keys():
             menu += f"• {key.title():12} - {descriptions[key]}\n"
 
         return menu
 
 
-# Демонстрация работы
 if __name__ == "__main__":
     print("ДЕМОНСТРАЦИЯ ПАТТЕРНА 'ФАБРИЧНЫЙ МЕТОД'")
     print("Кофе-автомат с 5 типами напитков")
@@ -280,7 +279,5 @@ if __name__ == "__main__":
 
     print("ИТОГОВАЯ СТАТИСТИКА")
 
-    for mmachine in sstation._machines.values():
-        print(mmachine.get_stats())
-
-    print("\nДемонстрация завершена!")
+    for machine in sstation.get_machines().values():
+        print(machine.get_stats())
