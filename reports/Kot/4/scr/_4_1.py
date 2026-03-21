@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import Dict, List, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import requests
 import matplotlib.pyplot as plt
@@ -38,6 +38,11 @@ class ChartData:
     """Класс для хранения данных для графиков"""
 
     stats_list: List[ContributorStats]
+    logins: List[str] = field(init=False)
+    commits: List[int] = field(init=False)
+    prs: List[int] = field(init=False)
+    issues: List[int] = field(init=False)
+    comments: List[int] = field(init=False)
 
     def __post_init__(self):
         """Инициализация вычисляемых полей после создания объекта"""
