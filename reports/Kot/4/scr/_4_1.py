@@ -4,16 +4,17 @@ GitHub Contributor Activity Analyzer
 Анализирует активность контрибьюторов в указанном репозитории за определенный период
 """
 
-import requests
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+import sys
+import time
 from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import Dict, List, Tuple, Optional
-import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import time
-import sys
+
+import requests
+import matplotlib.pyplot as plt
+import numpy as np
+from dateutil import parser
 
 # Настройка русских шрифтов для matplotlib
 plt.rcParams["font.family"] = ["DejaVu Sans", "Arial", "sans-serif"]
@@ -93,7 +94,8 @@ class GitHubContributorAnalyzer:
                     wait_time = max(0, reset_time - time.time())
                     if wait_time > 0:
                         print(
-                            f"  ⚠ Предупреждение: осталось {remaining} запросов. Ожидание {wait_time:.0f} секунд..."
+                            f"  ⚠ Предупреждение: осталось {remaining} запросов. "
+                            f"Ожидание {wait_time:.0f} секунд..."
                         )
                         time.sleep(wait_time)
 
@@ -127,7 +129,8 @@ class GitHubContributorAnalyzer:
         """
         print(f"\n📊 Анализ контрибьюторов репозитория {self.repo}")
         print(
-            f"📅 Период анализа: с {since_date.strftime('%Y-%m-%d')} по {datetime.now().strftime('%Y-%m-%d')}"
+            f"📅 Период анализа: с {since_date.strftime('%Y-%m-%d')} "
+            f"по {datetime.now().strftime('%Y-%m-%d')}"
         )
         print(f"🔍 Минимальное количество коммитов: {min_commits}\n")
 
@@ -139,7 +142,7 @@ class GitHubContributorAnalyzer:
         # Фильтруем контрибьюторов с достаточным количеством коммитов
         contributors = [c for c in contributors if c["contributions"] >= min_commits]
 
-        print(f"   Найдено {len(contributors)} контрибьюторов (после фильтрации)\n")
+        print(f"   Найдено {len(contributors)} контрибьюторов " f"(после фильтрации)\n")
 
         # Собираем данные по каждому контрибьютору
         print("2. Сбор детальной статистики...")
@@ -164,21 +167,20 @@ class GitHubContributorAnalyzer:
                 )
 
             # Ожидаем завершения всех задач
-            for i, future in enumerate(as_completed(futures), 1):
+            for i, _ in enumerate(as_completed(futures), 1):
                 if i % 20 == 0:
                     print(f"   Обработано {i}/{len(futures)} задач...")
 
         print("   Сбор данных завершен\n")
 
         # Рассчитываем общий балл активности
-        for login, stats in self.contributors.items():
+        for stats in self.contributors.values():
             stats["activity_score"] = (
                 stats["commits"] * 5
                 + stats["prs_opened"] * 3
                 + stats["issues_opened"] * 2
                 + stats["comments"] * 1
-                + (stats["additions"] + stats["deletions"])
-                / 100  # Нормируем изменения кода
+                + (stats["additions"] + stats["deletions"]) / 100
             )
 
         # Фильтруем по минимальному количеству коммитов
@@ -203,10 +205,8 @@ class GitHubContributorAnalyzer:
         self.contributors[contributor]["commits"] = len(commits)
 
         # Получение детальной статистики изменений для коммитов
-        # Ограничиваем последними 30 коммитами для производительности
         for commit in commits[:30]:
             try:
-                # Получаем детали коммита
                 commit_url = commit["url"]
                 response = requests.get(commit_url, headers=self.headers, timeout=5)
                 if response.status_code == 200:
@@ -218,12 +218,11 @@ class GitHubContributorAnalyzer:
                         self.contributors[contributor]["deletions"] += commit_data[
                             "stats"
                         ].get("deletions", 0)
-            except Exception:
+            except (requests.RequestException, KeyError, ValueError):
                 continue
 
     def _get_prs_stats(self, contributor: str, since_date: datetime) -> None:
         """Получение статистики Pull Requests"""
-        # Открытые PR
         prs_url = f"{self.base_url}/repos/{self.repo}/pulls"
         params = {"state": "all", "since": since_date.isoformat()}
 
@@ -254,7 +253,6 @@ class GitHubContributorAnalyzer:
 
     def _get_comments_stats(self, contributor: str, since_date: datetime) -> None:
         """Получение статистики комментариев"""
-        # Комментарии к issues и PR
         comments_url = f"{self.base_url}/repos/{self.repo}/issues/comments"
         params = {"since": since_date.isoformat()}
 
@@ -279,7 +277,7 @@ class GitHubContributorAnalyzer:
         )
         return sorted_contributors[:top_n]
 
-    def print_report(self, top_contributors: List[Tuple[str, Dict]], min_commits: int):
+    def print_report(self, top_contributors: List[Tuple[str, Dict]]) -> None:
         """Вывод отчета в консоль"""
         print("\n" + "=" * 80)
         print(f"📈 ТОП-5 АКТИВНЫХ КОНТРИБЬЮТОРОВ В {self.repo.upper()}")
@@ -289,24 +287,91 @@ class GitHubContributorAnalyzer:
             print(f"\n{i}. @{login}")
             print(f"   ├─ 📝 Коммиты: {stats['commits']}")
             print(
-                f"   ├─ 💻 Изменения кода: +{stats['additions']} / -{stats['deletions']} строк"
+                f"   ├─ 💻 Изменения кода: +{stats['additions']} / "
+                f"-{stats['deletions']} строк"
             )
             print(
-                f"   ├─ 🔀 Pull Requests: открыто {stats['prs_opened']} / закрыто {stats['prs_closed']}"
+                f"   ├─ 🔀 Pull Requests: открыто {stats['prs_opened']} / "
+                f"закрыто {stats['prs_closed']}"
             )
             print(
-                f"   ├─ 🐛 Issues: открыто {stats['issues_opened']} / закрыто {stats['issues_closed']}"
+                f"   ├─ 🐛 Issues: открыто {stats['issues_opened']} / "
+                f"закрыто {stats['issues_closed']}"
             )
             print(
-                f"   ├─ 💬 Комментарии: {stats['comments']} (PR: {stats['pr_comments']}, Issues: {stats['issue_comments']})"
+                f"   ├─ 💬 Комментарии: {stats['comments']} "
+                f"(PR: {stats['pr_comments']}, Issues: {stats['issue_comments']})"
             )
             print(f"   └─ ⭐ Активность: {stats['activity_score']:.1f} баллов")
 
         print("\n" + "=" * 80)
 
+    def _create_radar_chart(
+        self, top_contributors: List[Tuple[str, Dict]], axes: plt.Axes
+    ) -> None:
+        """Создание радарной диаграммы для сравнения контрибьюторов"""
+        if len(top_contributors) >= 3:
+            metrics = ["Коммиты", "PR", "Issues", "Комментарии", "Изменения\n(норм.)"]
+            top3_data = []
+
+            # Нормализуем данные для топ-3
+            max_commits = max(s["commits"] for _, s in top_contributors[:3])
+            max_prs = max(s["prs_opened"] for _, s in top_contributors[:3])
+            max_issues = max(s["issues_opened"] for _, s in top_contributors[:3])
+            max_comments = max(s["comments"] for _, s in top_contributors[:3])
+
+            for _, stats in top_contributors[:3]:
+                normalized = [
+                    stats["commits"] / max_commits if max_commits > 0 else 0,
+                    stats["prs_opened"] / max_prs if max_prs > 0 else 0,
+                    stats["issues_opened"] / max_issues if max_issues > 0 else 0,
+                    stats["comments"] / max_comments if max_comments > 0 else 0,
+                    min((stats["additions"] + stats["deletions"]) / 1000, 1),
+                ]
+                top3_data.append(normalized)
+
+            # Радарная диаграмма
+            angles = np.linspace(0, 2 * np.pi, len(metrics), endpoint=False).tolist()
+            angles += angles[:1]
+
+            ax = plt.subplot(2, 2, 4, projection="polar")
+            colors_radar = ["#e74c3c", "#3498db", "#2ecc71"]
+
+            for i, data in enumerate(top3_data):
+                data += data[:1]
+                ax.plot(
+                    angles,
+                    data,
+                    "o-",
+                    linewidth=2,
+                    label=f"@{top_contributors[i][0]}",
+                    color=colors_radar[i],
+                )
+                ax.fill(angles, data, alpha=0.1, color=colors_radar[i])
+
+            ax.set_xticks(angles[:-1])
+            ax.set_xticklabels(metrics)
+            ax.set_title(
+                "Сравнительная активность (нормированные показатели)",
+                fontsize=12,
+                fontweight="bold",
+                pad=20,
+            )
+            ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.0))
+        else:
+            axes.text(
+                0.5,
+                0.5,
+                "Недостаточно данных\nдля радарной диаграммы",
+                ha="center",
+                va="center",
+                fontsize=12,
+            )
+            axes.set_title("Сравнительная активность", fontsize=12, fontweight="bold")
+
     def visualize_activity(
         self, top_contributors: List[Tuple[str, Dict]], filename: str = None
-    ):
+    ) -> None:
         """Визуализация активности контрибьюторов"""
         if not top_contributors:
             print("Нет данных для визуализации")
@@ -368,62 +433,8 @@ class GitHubContributorAnalyzer:
                 i, v + max(comments) * 0.01, str(v), ha="center", fontsize=9
             )
 
-        # График 4: Общая активность (радарная диаграмма для топ-3)
-        if len(top_contributors) >= 3:
-            metrics = ["Коммиты", "PR", "Issues", "Комментарии", "Изменения\n(норм.)"]
-            top3_data = []
-            for _, stats in top_contributors[:3]:
-                normalized = [
-                    stats["commits"] / max(commits),
-                    stats["prs_opened"] / max(prs) if max(prs) > 0 else 0,
-                    stats["issues_opened"] / max(issues) if max(issues) > 0 else 0,
-                    stats["comments"] / max(comments) if max(comments) > 0 else 0,
-                    min(
-                        (stats["additions"] + stats["deletions"]) / 1000, 1
-                    ),  # Нормируем до 1
-                ]
-                top3_data.append(normalized)
-
-            # Радарная диаграмма
-            angles = np.linspace(0, 2 * np.pi, len(metrics), endpoint=False).tolist()
-            angles += angles[:1]
-
-            ax = plt.subplot(2, 2, 4, projection="polar")
-            colors_radar = ["#e74c3c", "#3498db", "#2ecc71"]
-
-            for i, data in enumerate(top3_data):
-                data += data[:1]
-                ax.plot(
-                    angles,
-                    data,
-                    "o-",
-                    linewidth=2,
-                    label=f"@{top_contributors[i][0]}",
-                    color=colors_radar[i],
-                )
-                ax.fill(angles, data, alpha=0.1, color=colors_radar[i])
-
-            ax.set_xticks(angles[:-1])
-            ax.set_xticklabels(metrics)
-            ax.set_title(
-                "Сравнительная активность (нормированные показатели)",
-                fontsize=12,
-                fontweight="bold",
-                pad=20,
-            )
-            ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.0))
-        else:
-            axes[1, 1].text(
-                0.5,
-                0.5,
-                "Недостаточно данных\nдля радарной диаграммы",
-                ha="center",
-                va="center",
-                fontsize=12,
-            )
-            axes[1, 1].set_title(
-                "Сравнительная активность", fontsize=12, fontweight="bold"
-            )
+        # График 4: Радарная диаграмма
+        self._create_radar_chart(top_contributors, axes[1, 1])
 
         plt.tight_layout()
         plt.savefig(filename, dpi=150, bbox_inches="tight")
@@ -432,11 +443,20 @@ class GitHubContributorAnalyzer:
 
     def generate_html_report(
         self, top_contributors: List[Tuple[str, Dict]], filename: str = None
-    ):
+    ) -> None:
         """Генерация HTML отчета"""
         if filename is None:
             filename = f"{self.repo_name}_report.html"
 
+        html_content = self._build_html_report(top_contributors)
+
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(html_content)
+
+        print(f"📄 HTML отчет сохранен в '{filename}'")
+
+    def _build_html_report(self, top_contributors: List[Tuple[str, Dict]]) -> str:
+        """Построение HTML содержимого отчета"""
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -512,7 +532,7 @@ class GitHubContributorAnalyzer:
                 <h1>📊 GitHub Contributor Activity Report</h1>
                 <p><strong>Репозиторий:</strong> {self.repo}</p>
                 <p><strong>Дата отчета:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-                
+
                 <h2>🏆 Топ-5 активных контрибьюторов</h2>
         """
 
@@ -561,20 +581,16 @@ class GitHubContributorAnalyzer:
         </html>
         """
 
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(html_content)
-
-        print(f"📄 HTML отчет сохранен в '{filename}'")
+        return html_content
 
 
-def main():
-    """Основная функция"""
+def get_user_input() -> Tuple[str, int, int, Optional[str]]:
+    """Получение входных данных от пользователя"""
     print("=" * 80)
     print("🐙 GitHub Contributor Activity Analyzer")
     print("Анализ активности контрибьюторов в GitHub репозитории")
     print("=" * 80)
 
-    # Ввод данных от пользователя
     repo = input("\nВведите репозиторий (owner/repo): ").strip()
     if not repo or "/" not in repo:
         print("Ошибка: неверный формат репозитория. Используйте формат owner/repo")
@@ -590,24 +606,31 @@ def main():
 
     period_key = period_map.get(period_choice, "month")
     days = {"week": 7, "month": 30, "year": 365}[period_key]
-    since_date = datetime.now() - timedelta(days=days)
 
     min_commits_input = input(
-        "\nМинимальное количество коммитов для попадания в рейтинг (по умолчанию 0): "
+        "\nМинимальное количество коммитов для попадания в рейтинг "
+        "(по умолчанию 0): "
     ).strip()
     min_commits = int(min_commits_input) if min_commits_input else 0
 
-    # Опционально: GitHub токен
     token = input(
         "\nGitHub токен (опционально, для увеличения лимита запросов): "
     ).strip()
     if not token:
         token = None
 
-    print("\n" + "=" * 80)
-    print("🚀 Начинаем анализ...")
+    return repo, days, min_commits, token
 
+
+def main() -> None:
+    """Основная функция"""
     try:
+        repo, days, min_commits, token = get_user_input()
+        since_date = datetime.now() - timedelta(days=days)
+
+        print("\n" + "=" * 80)
+        print("🚀 Начинаем анализ...")
+
         # Создаем анализатор
         analyzer = GitHubContributorAnalyzer(repo, token)
 
@@ -622,7 +645,7 @@ def main():
         top_contributors = analyzer.get_top_contributors(5)
 
         # Выводим отчет
-        analyzer.print_report(top_contributors, min_commits)
+        analyzer.print_report(top_contributors)
 
         # Визуализируем результаты
         analyzer.visualize_activity(top_contributors)
@@ -632,6 +655,9 @@ def main():
 
         print("\n✨ Анализ успешно завершен!")
 
+    except requests.exceptions.RequestException as e:
+        print(f"\n❌ Ошибка сети: {e}")
+        sys.exit(1)
     except Exception as e:
         print(f"\n❌ Произошла ошибка: {e}")
         import traceback
