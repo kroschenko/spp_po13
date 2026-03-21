@@ -21,33 +21,32 @@ plt.rcParams["font.family"] = ["DejaVu Sans", "Arial", "sans-serif"]
 plt.rcParams["axes.unicode_minus"] = False
 
 
-class ChartData:
-    """Класс для хранения данных для графиков"""
+class ContributorStats:
+    """Класс для хранения статистики контрибьютора"""
 
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self,
-        logins: List[str],
-        commits: List[int],
-        prs: List[int],
-        issues: List[int],
-        comments: List[int],
-    ):
-        """
-        Инициализация данных для графиков
-
-        Args:
-            logins: список логинов
-            commits: список количества коммитов
-            prs: список количества PR
-            issues: список количества issues
-            comments: список количества комментариев
-        """
-        self.logins = logins
+    def __init__(self, login: str, commits: int, prs: int, issues: int, comments: int):
+        self.login = login
         self.commits = commits
         self.prs = prs
         self.issues = issues
         self.comments = comments
+
+
+class ChartData:
+    """Класс для хранения данных для графиков"""
+
+    def __init__(self, stats_list: List[ContributorStats]):
+        """
+        Инициализация данных для графиков
+
+        Args:
+            stats_list: список статистик контрибьюторов
+        """
+        self.logins = [f"@{s.login}" for s in stats_list]
+        self.commits = [s.commits for s in stats_list]
+        self.prs = [s.prs for s in stats_list]
+        self.issues = [s.issues for s in stats_list]
+        self.comments = [s.comments for s in stats_list]
 
 
 class GitHubContributorAnalyzer:
@@ -170,7 +169,7 @@ class GitHubContributorAnalyzer:
 
         # Фильтруем контрибьюторов с достаточным количеством коммитов
         contributors = [c for c in contributors if c["contributions"] >= min_commits]
-        print(f"   Найдено {len(contributors)} контрибьюторов " f"(после фильтрации)\n")
+        print(f"   Найдено {len(contributors)} контрибьюторов (после фильтрации)\n")
         return contributors
 
     def _process_contributor_data(self, login: str, since_date: datetime) -> None:
@@ -362,13 +361,18 @@ class GitHubContributorAnalyzer:
         self, top_contributors: List[Tuple[str, Dict]]
     ) -> ChartData:
         """Подготовка данных для графиков"""
-        logins = [f"@{login}" for login, _ in top_contributors]
-        commits = [stats["commits"] for _, stats in top_contributors]
-        prs = [stats["prs_opened"] for _, stats in top_contributors]
-        issues = [stats["issues_opened"] for _, stats in top_contributors]
-        comments = [stats["comments"] for _, stats in top_contributors]
+        stats_list = []
+        for login, stats in top_contributors:
+            contributor_stats = ContributorStats(
+                login=login,
+                commits=stats["commits"],
+                prs=stats["prs_opened"],
+                issues=stats["issues_opened"],
+                comments=stats["comments"],
+            )
+            stats_list.append(contributor_stats)
 
-        return ChartData(logins, commits, prs, issues, comments)
+        return ChartData(stats_list)
 
     def _create_commits_chart(self, ax: plt.Axes, data: ChartData) -> None:
         """Создание графика коммитов"""
@@ -743,8 +747,8 @@ def main() -> None:
         handle_error(e, "Ошибка сети")
     except (ValueError, KeyError, AttributeError) as e:
         handle_error(e, "Ошибка обработки данных")
-    except Exception as e:  # noqa: BLE001
-        # Это последний рубеж защиты для непредвиденных ошибок
+    except Exception as e:
+        # Последний рубеж для непредвиденных ошибок
         print(f"\n❌ Непредвиденная ошибка: {e}")
         traceback.print_exc()
         sys.exit(1)
