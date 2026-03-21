@@ -6,6 +6,7 @@ GitHub Contributor Activity Analyzer
 
 import sys
 import time
+import traceback
 from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import Dict, List, Tuple, Optional
@@ -14,7 +15,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 import matplotlib.pyplot as plt
 import numpy as np
-from dateutil import parser
 
 # Настройка русских шрифтов для matplotlib
 plt.rcParams["font.family"] = ["DejaVu Sans", "Arial", "sans-serif"]
@@ -68,6 +68,19 @@ class GitHubContributorAnalyzer:
             }
         )
 
+    def _check_rate_limit(self, response: requests.Response) -> None:
+        """Проверка лимитов API и ожидание при необходимости"""
+        remaining = int(response.headers.get("X-RateLimit-Remaining", 0))
+        if remaining < 10:
+            reset_time = int(response.headers.get("X-RateLimit-Reset", 0))
+            wait_time = max(0, reset_time - time.time())
+            if wait_time > 0:
+                print(
+                    f"  ⚠ Предупреждение: осталось {remaining} запросов. "
+                    f"Ожидание {wait_time:.0f} секунд..."
+                )
+                time.sleep(wait_time)
+
     def _make_request(self, url: str, params: Dict = None) -> List[Dict]:
         """
         Выполнение запроса к GitHub API с обработкой пагинации
@@ -87,17 +100,7 @@ class GitHubContributorAnalyzer:
                 )
                 response.raise_for_status()
 
-                # Проверка лимитов API
-                remaining = int(response.headers.get("X-RateLimit-Remaining", 0))
-                if remaining < 10:
-                    reset_time = int(response.headers.get("X-RateLimit-Reset", 0))
-                    wait_time = max(0, reset_time - time.time())
-                    if wait_time > 0:
-                        print(
-                            f"  ⚠ Предупреждение: осталось {remaining} запросов. "
-                            f"Ожидание {wait_time:.0f} секунд..."
-                        )
-                        time.sleep(wait_time)
+                self._check_rate_limit(response)
 
                 data = response.json()
                 if not data:
@@ -121,12 +124,8 @@ class GitHubContributorAnalyzer:
 
         return results
 
-    def get_contributors_stats(
-        self, since_date: datetime, min_commits: int = 0
-    ) -> Dict:
-        """
-        Получение полной статистики по контрибьюторам
-        """
+    def _print_analysis_header(self, since_date: datetime, min_commits: int) -> None:
+        """Вывод заголовка анализа"""
         print(f"\n📊 Анализ контрибьюторов репозитория {self.repo}")
         print(
             f"📅 Период анализа: с {since_date.strftime('%Y-%m-%d')} "
@@ -134,46 +133,33 @@ class GitHubContributorAnalyzer:
         )
         print(f"🔍 Минимальное количество коммитов: {min_commits}\n")
 
-        # Получение списка контрибьюторов
+    def _fetch_contributors_list(self, min_commits: int) -> List[Dict]:
+        """Получение списка контрибьюторов"""
         print("1. Получение списка контрибьюторов...")
         contributors_url = f"{self.base_url}/repos/{self.repo}/contributors"
         contributors = self._make_request(contributors_url)
 
         # Фильтруем контрибьюторов с достаточным количеством коммитов
         contributors = [c for c in contributors if c["contributions"] >= min_commits]
-
         print(f"   Найдено {len(contributors)} контрибьюторов " f"(после фильтрации)\n")
+        return contributors
 
-        # Собираем данные по каждому контрибьютору
-        print("2. Сбор детальной статистики...")
+    def _process_contributor_data(
+        self, contributor: Dict, since_date: datetime
+    ) -> None:
+        """Обработка данных одного контрибьютора"""
+        login = contributor["login"]
+        self.contributors[login]["login"] = login
+        self.contributors[login]["avatar"] = contributor.get("avatar_url", "")
 
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = []
-            for contributor in contributors:
-                login = contributor["login"]
-                self.contributors[login]["login"] = login
-                self.contributors[login]["avatar"] = contributor.get("avatar_url", "")
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            executor.submit(self._get_commits_stats, login, since_date)
+            executor.submit(self._get_prs_stats, login, since_date)
+            executor.submit(self._get_issues_stats, login, since_date)
+            executor.submit(self._get_comments_stats, login, since_date)
 
-                # Запускаем задачи параллельно
-                futures.append(
-                    executor.submit(self._get_commits_stats, login, since_date)
-                )
-                futures.append(executor.submit(self._get_prs_stats, login, since_date))
-                futures.append(
-                    executor.submit(self._get_issues_stats, login, since_date)
-                )
-                futures.append(
-                    executor.submit(self._get_comments_stats, login, since_date)
-                )
-
-            # Ожидаем завершения всех задач
-            for i, _ in enumerate(as_completed(futures), 1):
-                if i % 20 == 0:
-                    print(f"   Обработано {i}/{len(futures)} задач...")
-
-        print("   Сбор данных завершен\n")
-
-        # Рассчитываем общий балл активности
+    def _calculate_activity_scores(self) -> None:
+        """Расчет баллов активности для всех контрибьюторов"""
         for stats in self.contributors.values():
             stats["activity_score"] = (
                 stats["commits"] * 5
@@ -182,6 +168,30 @@ class GitHubContributorAnalyzer:
                 + stats["comments"] * 1
                 + (stats["additions"] + stats["deletions"]) / 100
             )
+
+    def get_contributors_stats(
+        self, since_date: datetime, min_commits: int = 0
+    ) -> Dict:
+        """
+        Получение полной статистики по контрибьюторам
+        """
+        self._print_analysis_header(since_date, min_commits)
+
+        # Получение списка контрибьюторов
+        contributors = self._fetch_contributors_list(min_commits)
+
+        if not contributors:
+            return {}
+
+        # Собираем данные по каждому контрибьютору
+        print("2. Сбор детальной статистики...")
+        for contributor in contributors:
+            self._process_contributor_data(contributor, since_date)
+
+        print("   Сбор данных завершен\n")
+
+        # Рассчитываем баллы активности
+        self._calculate_activity_scores()
 
         # Фильтруем по минимальному количеству коммитов
         filtered = {
@@ -277,6 +287,28 @@ class GitHubContributorAnalyzer:
         )
         return sorted_contributors[:top_n]
 
+    def _print_contributor_stats(self, rank: int, login: str, stats: Dict) -> None:
+        """Вывод статистики одного контрибьютора"""
+        print(f"\n{rank}. @{login}")
+        print(f"   ├─ 📝 Коммиты: {stats['commits']}")
+        print(
+            f"   ├─ 💻 Изменения кода: +{stats['additions']} / "
+            f"-{stats['deletions']} строк"
+        )
+        print(
+            f"   ├─ 🔀 Pull Requests: открыто {stats['prs_opened']} / "
+            f"закрыто {stats['prs_closed']}"
+        )
+        print(
+            f"   ├─ 🐛 Issues: открыто {stats['issues_opened']} / "
+            f"закрыто {stats['issues_closed']}"
+        )
+        print(
+            f"   ├─ 💬 Комментарии: {stats['comments']} "
+            f"(PR: {stats['pr_comments']}, Issues: {stats['issue_comments']})"
+        )
+        print(f"   └─ ⭐ Активность: {stats['activity_score']:.1f} баллов")
+
     def print_report(self, top_contributors: List[Tuple[str, Dict]]) -> None:
         """Вывод отчета в консоль"""
         print("\n" + "=" * 80)
@@ -284,27 +316,50 @@ class GitHubContributorAnalyzer:
         print("=" * 80)
 
         for i, (login, stats) in enumerate(top_contributors, 1):
-            print(f"\n{i}. @{login}")
-            print(f"   ├─ 📝 Коммиты: {stats['commits']}")
-            print(
-                f"   ├─ 💻 Изменения кода: +{stats['additions']} / "
-                f"-{stats['deletions']} строк"
-            )
-            print(
-                f"   ├─ 🔀 Pull Requests: открыто {stats['prs_opened']} / "
-                f"закрыто {stats['prs_closed']}"
-            )
-            print(
-                f"   ├─ 🐛 Issues: открыто {stats['issues_opened']} / "
-                f"закрыто {stats['issues_closed']}"
-            )
-            print(
-                f"   ├─ 💬 Комментарии: {stats['comments']} "
-                f"(PR: {stats['pr_comments']}, Issues: {stats['issue_comments']})"
-            )
-            print(f"   └─ ⭐ Активность: {stats['activity_score']:.1f} баллов")
+            self._print_contributor_stats(i, login, stats)
 
         print("\n" + "=" * 80)
+
+    def _create_bar_chart(
+        self,
+        ax: plt.Axes,
+        logins: List[str],
+        values: List[int],
+        title: str,
+        ylabel: str,
+        color: str = None,
+    ) -> None:
+        """Создание столбчатой диаграммы"""
+        if color:
+            ax.bar(logins, values, color=color, alpha=0.8)
+        else:
+            colors = plt.cm.viridis(np.linspace(0, 0.9, len(logins)))
+            ax.bar(logins, values, color=colors, alpha=0.8)
+
+        ax.set_title(title, fontsize=12, fontweight="bold")
+        ax.set_ylabel(ylabel)
+        ax.tick_params(axis="x", rotation=45)
+
+        # Добавляем значения на столбцы
+        for i, v in enumerate(values):
+            ax.text(i, v + max(values) * 0.01, str(v), ha="center", fontsize=9)
+
+    def _create_grouped_bar_chart(
+        self, ax: plt.Axes, logins: List[str], prs: List[int], issues: List[int]
+    ) -> None:
+        """Создание сгруппированной столбчатой диаграммы для PR и Issues"""
+        x = np.arange(len(logins))
+        width = 0.35
+
+        ax.bar(
+            x - width / 2, prs, width, label="Pull Requests", color="#2ecc71", alpha=0.8
+        )
+        ax.bar(x + width / 2, issues, width, label="Issues", color="#e74c3c", alpha=0.8)
+        ax.set_title("Pull Requests и Issues", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Количество")
+        ax.set_xticks(x)
+        ax.set_xticklabels(logins, rotation=45)
+        ax.legend()
 
     def _create_radar_chart(
         self, top_contributors: List[Tuple[str, Dict]], axes: plt.Axes
@@ -396,42 +451,22 @@ class GitHubContributorAnalyzer:
         )
 
         # График 1: Коммиты
-        colors = plt.cm.viridis(np.linspace(0, 0.9, len(logins)))
-        axes[0, 0].bar(logins, commits, color=colors, alpha=0.8)
-        axes[0, 0].set_title("Количество коммитов", fontsize=12, fontweight="bold")
-        axes[0, 0].set_ylabel("Коммиты")
-        axes[0, 0].tick_params(axis="x", rotation=45)
-
-        # Добавляем значения на столбцы
-        for i, v in enumerate(commits):
-            axes[0, 0].text(i, v + max(commits) * 0.01, str(v), ha="center", fontsize=9)
-
-        # График 2: Pull Requests и Issues (сгруппированные)
-        x = np.arange(len(logins))
-        width = 0.35
-        axes[0, 1].bar(
-            x - width / 2, prs, width, label="Pull Requests", color="#2ecc71", alpha=0.8
+        self._create_bar_chart(
+            axes[0, 0], logins, commits, "Количество коммитов", "Коммиты"
         )
-        axes[0, 1].bar(
-            x + width / 2, issues, width, label="Issues", color="#e74c3c", alpha=0.8
-        )
-        axes[0, 1].set_title("Pull Requests и Issues", fontsize=12, fontweight="bold")
-        axes[0, 1].set_ylabel("Количество")
-        axes[0, 1].set_xticks(x)
-        axes[0, 1].set_xticklabels(logins, rotation=45)
-        axes[0, 1].legend()
+
+        # График 2: Pull Requests и Issues
+        self._create_grouped_bar_chart(axes[0, 1], logins, prs, issues)
 
         # График 3: Комментарии
-        axes[1, 0].bar(logins, comments, color="#3498db", alpha=0.8)
-        axes[1, 0].set_title("Количество комментариев", fontsize=12, fontweight="bold")
-        axes[1, 0].set_ylabel("Комментарии")
-        axes[1, 0].tick_params(axis="x", rotation=45)
-
-        # Добавляем значения на столбцы
-        for i, v in enumerate(comments):
-            axes[1, 0].text(
-                i, v + max(comments) * 0.01, str(v), ha="center", fontsize=9
-            )
+        self._create_bar_chart(
+            axes[1, 0],
+            logins,
+            comments,
+            "Количество комментариев",
+            "Комментарии",
+            "#3498db",
+        )
 
         # График 4: Радарная диаграмма
         self._create_radar_chart(top_contributors, axes[1, 1])
@@ -440,20 +475,6 @@ class GitHubContributorAnalyzer:
         plt.savefig(filename, dpi=150, bbox_inches="tight")
         print(f"\n📊 Графики активности сохранены в '{filename}'")
         plt.show()
-
-    def generate_html_report(
-        self, top_contributors: List[Tuple[str, Dict]], filename: str = None
-    ) -> None:
-        """Генерация HTML отчета"""
-        if filename is None:
-            filename = f"{self.repo_name}_report.html"
-
-        html_content = self._build_html_report(top_contributors)
-
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(html_content)
-
-        print(f"📄 HTML отчет сохранен в '{filename}'")
 
     def _build_html_report(self, top_contributors: List[Tuple[str, Dict]]) -> str:
         """Построение HTML содержимого отчета"""
@@ -583,6 +604,20 @@ class GitHubContributorAnalyzer:
 
         return html_content
 
+    def generate_html_report(
+        self, top_contributors: List[Tuple[str, Dict]], filename: str = None
+    ) -> None:
+        """Генерация HTML отчета"""
+        if filename is None:
+            filename = f"{self.repo_name}_report.html"
+
+        html_content = self._build_html_report(top_contributors)
+
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(html_content)
+
+        print(f"📄 HTML отчет сохранен в '{filename}'")
+
 
 def get_user_input() -> Tuple[str, int, int, Optional[str]]:
     """Получение входных данных от пользователя"""
@@ -660,8 +695,6 @@ def main() -> None:
         sys.exit(1)
     except Exception as e:
         print(f"\n❌ Произошла ошибка: {e}")
-        import traceback
-
         traceback.print_exc()
         sys.exit(1)
 
