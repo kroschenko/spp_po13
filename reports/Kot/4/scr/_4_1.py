@@ -10,7 +10,7 @@ import traceback
 from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import Dict, List, Tuple, Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 import matplotlib.pyplot as plt
@@ -19,6 +19,24 @@ import numpy as np
 # Настройка русских шрифтов для matplotlib
 plt.rcParams["font.family"] = ["DejaVu Sans", "Arial", "sans-serif"]
 plt.rcParams["axes.unicode_minus"] = False
+
+
+class ChartData:
+    """Класс для хранения данных для графиков"""
+
+    def __init__(
+        self,
+        logins: List[str],
+        commits: List[int],
+        prs: List[int],
+        issues: List[int],
+        comments: List[int],
+    ):
+        self.logins = logins
+        self.commits = commits
+        self.prs = prs
+        self.issues = issues
+        self.comments = comments
 
 
 class GitHubContributorAnalyzer:
@@ -192,7 +210,8 @@ class GitHubContributorAnalyzer:
                     executor.submit(self._process_contributor_data, login, since_date)
                 )
 
-            for i, _ in enumerate(as_completed(futures), 1):
+            for i, future in enumerate(futures, 1):
+                future.result()  # Ждем завершения
                 if i % 20 == 0:
                     print(f"   Обработано {i}/{len(futures)} задач...")
 
@@ -328,49 +347,71 @@ class GitHubContributorAnalyzer:
 
         print("\n" + "=" * 80)
 
-    def _create_bar_chart(
-        self,
-        ax: plt.Axes,
-        logins: List[str],
-        values: List[int],
-        title: str,
-        ylabel: str,
-        color: str = None,
-    ) -> None:
-        """Создание столбчатой диаграммы"""
-        if color:
-            ax.bar(logins, values, color=color, alpha=0.8)
-        else:
-            colors = plt.cm.viridis(np.linspace(0, 0.9, len(logins)))
-            ax.bar(logins, values, color=colors, alpha=0.8)
+    def _prepare_chart_data(
+        self, top_contributors: List[Tuple[str, Dict]]
+    ) -> ChartData:
+        """Подготовка данных для графиков"""
+        logins = [f"@{login}" for login, _ in top_contributors]
+        commits = [stats["commits"] for _, stats in top_contributors]
+        prs = [stats["prs_opened"] for _, stats in top_contributors]
+        issues = [stats["issues_opened"] for _, stats in top_contributors]
+        comments = [stats["comments"] for _, stats in top_contributors]
 
-        ax.set_title(title, fontsize=12, fontweight="bold")
-        ax.set_ylabel(ylabel)
+        return ChartData(logins, commits, prs, issues, comments)
+
+    def _create_commits_chart(self, ax: plt.Axes, data: ChartData) -> None:
+        """Создание графика коммитов"""
+        colors = plt.cm.viridis(np.linspace(0, 0.9, len(data.logins)))
+        ax.bar(data.logins, data.commits, color=colors, alpha=0.8)
+        ax.set_title("Количество коммитов", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Коммиты")
         ax.tick_params(axis="x", rotation=45)
 
-        if values:
-            max_val = max(values)
-            for i, v in enumerate(values):
+        if data.commits:
+            max_val = max(data.commits)
+            for i, v in enumerate(data.commits):
                 ax.text(i, v + max_val * 0.01, str(v), ha="center", fontsize=9)
 
-    def _create_grouped_bar_chart(
-        self, ax: plt.Axes, logins: List[str], prs: List[int], issues: List[int]
-    ) -> None:
-        """Создание сгруппированной столбчатой диаграммы для PR и Issues"""
-        x = np.arange(len(logins))
+    def _create_prs_issues_chart(self, ax: plt.Axes, data: ChartData) -> None:
+        """Создание графика PR и Issues"""
+        x = np.arange(len(data.logins))
         width = 0.35
 
         ax.bar(
-            x - width / 2, prs, width, label="Pull Requests", color="#2ecc71", alpha=0.8
+            x - width / 2,
+            data.prs,
+            width,
+            label="Pull Requests",
+            color="#2ecc71",
+            alpha=0.8,
         )
-        ax.bar(x + width / 2, issues, width, label="Issues", color="#e74c3c", alpha=0.8)
+        ax.bar(
+            x + width / 2,
+            data.issues,
+            width,
+            label="Issues",
+            color="#e74c3c",
+            alpha=0.8,
+        )
         ax.set_title("Pull Requests и Issues", fontsize=12, fontweight="bold")
         ax.set_ylabel("Количество")
         ax.set_xticks(x)
-        ax.set_xticklabels(logins, rotation=45)
+        ax.set_xticklabels(data.logins, rotation=45)
         ax.legend()
 
-    def _create_radar_chart(self, top_contributors: List[Tuple[str, Dict]]) -> plt.Axes:
+    def _create_comments_chart(self, ax: plt.Axes, data: ChartData) -> None:
+        """Создание графика комментариев"""
+        ax.bar(data.logins, data.comments, color="#3498db", alpha=0.8)
+        ax.set_title("Количество комментариев", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Комментарии")
+        ax.tick_params(axis="x", rotation=45)
+
+        if data.comments:
+            max_val = max(data.comments)
+            for i, v in enumerate(data.comments):
+                ax.text(i, v + max_val * 0.01, str(v), ha="center", fontsize=9)
+
+    def _create_radar_chart(self, top_contributors: List[Tuple[str, Dict]]) -> None:
         """Создание радарной диаграммы для сравнения контрибьюторов"""
         if len(top_contributors) >= 3:
             metrics = ["Коммиты", "PR", "Issues", "Комментарии", "Изменения"]
@@ -418,7 +459,6 @@ class GitHubContributorAnalyzer:
                 "Сравнительная активность", fontsize=12, fontweight="bold", pad=20
             )
             ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.0))
-            return ax
         else:
             fig = plt.gcf()
             ax = fig.add_subplot(2, 2, 4)
@@ -431,7 +471,6 @@ class GitHubContributorAnalyzer:
                 fontsize=12,
             )
             ax.set_title("Сравнительная активность", fontsize=12, fontweight="bold")
-            return ax
 
     def visualize_activity(
         self, top_contributors: List[Tuple[str, Dict]], filename: str = None
@@ -445,11 +484,7 @@ class GitHubContributorAnalyzer:
             filename = f"{self.repo_name}_contributors.png"
 
         # Подготовка данных
-        logins = [f"@{login}" for login, _ in top_contributors]
-        commits = [stats["commits"] for _, stats in top_contributors]
-        prs = [stats["prs_opened"] for _, stats in top_contributors]
-        issues = [stats["issues_opened"] for _, stats in top_contributors]
-        comments = [stats["comments"] for _, stats in top_contributors]
+        chart_data = self._prepare_chart_data(top_contributors)
 
         # Создание фигуры с несколькими подграфиками
         fig, axes = plt.subplots(2, 2, figsize=(14, 10))
@@ -459,28 +494,16 @@ class GitHubContributorAnalyzer:
             fontweight="bold",
         )
 
-        # График 1: Коммиты
-        self._create_bar_chart(
-            axes[0, 0], logins, commits, "Количество коммитов", "Коммиты"
-        )
-
-        # График 2: Pull Requests и Issues
-        self._create_grouped_bar_chart(axes[0, 1], logins, prs, issues)
-
-        # График 3: Комментарии
-        self._create_bar_chart(
-            axes[1, 0],
-            logins,
-            comments,
-            "Количество комментариев",
-            "Комментарии",
-            "#3498db",
-        )
-
-        # График 4: Радарная диаграмма
-        self._create_radar_chart(top_contributors)
+        # Создание графиков
+        self._create_commits_chart(axes[0, 0], chart_data)
+        self._create_prs_issues_chart(axes[0, 1], chart_data)
+        self._create_comments_chart(axes[1, 0], chart_data)
 
         plt.tight_layout()
+
+        # Создаем радарную диаграмму отдельно, так как она добавляет подграфик
+        self._create_radar_chart(top_contributors)
+
         plt.savefig(filename, dpi=150, bbox_inches="tight")
         print(f"\n📊 Графики активности сохранены в '{filename}'")
         plt.show()
