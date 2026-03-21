@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import Dict, List, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 
 import requests
 import matplotlib.pyplot as plt
@@ -21,32 +22,30 @@ plt.rcParams["font.family"] = ["DejaVu Sans", "Arial", "sans-serif"]
 plt.rcParams["axes.unicode_minus"] = False
 
 
+@dataclass
 class ContributorStats:
     """Класс для хранения статистики контрибьютора"""
 
-    def __init__(self, login: str, commits: int, prs: int, issues: int, comments: int):
-        self.login = login
-        self.commits = commits
-        self.prs = prs
-        self.issues = issues
-        self.comments = comments
+    login: str
+    commits: int
+    prs: int
+    issues: int
+    comments: int
 
 
+@dataclass
 class ChartData:
     """Класс для хранения данных для графиков"""
 
-    def __init__(self, stats_list: List[ContributorStats]):
-        """
-        Инициализация данных для графиков
+    stats_list: List[ContributorStats]
 
-        Args:
-            stats_list: список статистик контрибьюторов
-        """
-        self.logins = [f"@{s.login}" for s in stats_list]
-        self.commits = [s.commits for s in stats_list]
-        self.prs = [s.prs for s in stats_list]
-        self.issues = [s.issues for s in stats_list]
-        self.comments = [s.comments for s in stats_list]
+    def __post_init__(self):
+        """Инициализация вычисляемых полей после создания объекта"""
+        self.logins = [f"@{s.login}" for s in self.stats_list]
+        self.commits = [s.commits for s in self.stats_list]
+        self.prs = [s.prs for s in self.stats_list]
+        self.issues = [s.issues for s in self.stats_list]
+        self.comments = [s.comments for s in self.stats_list]
 
 
 class GitHubContributorAnalyzer:
