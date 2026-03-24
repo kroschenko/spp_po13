@@ -27,10 +27,10 @@ class VowelRemovalStrategy(EncryptionStrategy):
     """Стратегия: удаление всех гласных букв"""
 
     def __init__(self):
-        self._vowels = set('aeiouyаеёиоуыэюяAEIOUYАЕЁИОУЫЭЮЯ')
+        self._vowels = set("aeiouyаеёиоуыэюяAEIOUYАЕЁИОУЫЭЮЯ")
 
     def encrypt(self, text: str) -> str:
-        return ''.join(char for char in text if char not in self._vowels)
+        return "".join(char for char in text if char not in self._vowels)
 
     def decrypt(self, text: str) -> str:
         return f"[Невозможно восстановить гласные] {text}"
@@ -46,11 +46,11 @@ class CaesarShiftStrategy(EncryptionStrategy):
     def __init__(self, shift: int = 20):
         self.shift = shift
 
-        self.ru_lower = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
-        self.ru_upper = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+        self.ru_lower = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+        self.ru_upper = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
 
-        self.en_lower = 'abcdefghijklmnopqrstuvwxyz'
-        self.en_upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        self.en_lower = "abcdefghijklmnopqrstuvwxyz"
+        self.en_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     def _shift_char(self, char: str, alphabet: str, shift: int) -> str:
         """Сдвигает символ в пределах алфавита"""
@@ -74,7 +74,7 @@ class CaesarShiftStrategy(EncryptionStrategy):
                 result.append(self._shift_char(char, self.en_upper, self.shift))
             else:
                 result.append(char)
-        return ''.join(result)
+        return "".join(result)
 
     def decrypt(self, text: str) -> str:
         """Сдвигает буквы назад на shift позиций"""
@@ -90,7 +90,7 @@ class CaesarShiftStrategy(EncryptionStrategy):
                 result.append(self._shift_char(char, self.en_upper, -self.shift))
             else:
                 result.append(char)
-        return ''.join(result)
+        return "".join(result)
 
     @property
     def name(self) -> str:
@@ -103,7 +103,7 @@ class XorStrategy(EncryptionStrategy):
     def __init__(self, key: str = "чебурашка"):
         self.key = key
         # Преобразуем ключ в байт
-        self.key_bytes = key.encode('utf-8')
+        self.key_bytes = key.encode("utf-8")
 
     def _xor_operation(self, data: bytes) -> bytes:
         key_len = len(self.key_bytes)
@@ -119,7 +119,7 @@ class XorStrategy(EncryptionStrategy):
         Шифрует текст с помощью XOR
         Возвращает строку в шестнадцатеричном представлении
         """
-        text_bytes = text.encode('utf-8')
+        text_bytes = text.encode("utf-8")
         encrypted_bytes = self._xor_operation(text_bytes)
         return encrypted_bytes.hex()
 
@@ -130,7 +130,7 @@ class XorStrategy(EncryptionStrategy):
         try:
             encrypted_bytes = bytes.fromhex(text)
             decrypted_bytes = self._xor_operation(encrypted_bytes)
-            return decrypted_bytes.decode('utf-8')
+            return decrypted_bytes.decode("utf-8")
         except (ValueError, UnicodeDecodeError) as e:
             return f"[Ошибка расшифровки: {e}]"
 
@@ -165,12 +165,12 @@ class FileEncryptor:
             raise ValueError("Стратегия шифрования не установлена")
 
         try:
-            with open(input_path, 'r', encoding='utf-8') as f:
+            with open(input_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             encrypted_content = self._strategy.encrypt(content)
 
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 f.write(encrypted_content)
 
             return True
@@ -194,11 +194,11 @@ class FileEncryptor:
             raise ValueError("Стратегия шифрования не установлена")
 
         try:
-            with open(input_path, 'r', encoding='utf-8') as f:
+            with open(input_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             decrypted_content = self._strategy.decrypt(content)
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 f.write(decrypted_content)
 
             return True
@@ -219,7 +219,7 @@ def main():
 
     # Создаем тестовый файл
     test_file = "test_input.txt"
-    with open(test_file, 'w', encoding='utf-8') as f:
+    with open(test_file, "w", encoding="utf-8") as f:
         f.write("Привет, мир! Hello, world!\n")
         f.write("Это тестовый файл для шифрования.\n")
         f.write("XOR encryption test with key: чебурашка")
@@ -235,7 +235,7 @@ def main():
     encryptor.encrypt_file("test_input.txt", "test_vowel_removed.txt")
     encryptor.decrypt_file("test_vowel_removed.txt", "test_vowel_decoded.txt")
 
-    with open("test_vowel_removed.txt", 'r', encoding='utf-8') as f:
+    with open("test_vowel_removed.txt", "r", encoding="utf-8") as f:
         print("Зашифровано:")
         print(f.read())
 
@@ -249,7 +249,7 @@ def main():
     encryptor.decrypt_file("test_caesar.txt", "test_caesar_decoded.txt")
 
     print("Расшифрованный файл:")
-    with open("test_caesar_decoded.txt", 'r', encoding='utf-8') as f:
+    with open("test_caesar_decoded.txt", "r", encoding="utf-8") as f:
         print(f.read())
 
     # ===== Тест 3: XOR с ключом =====
@@ -260,14 +260,14 @@ def main():
 
     encryptor.encrypt_file("test_input.txt", "test_xor.txt")
 
-    with open("test_xor.txt", 'r', encoding='utf-8') as f:
+    with open("test_xor.txt", "r", encoding="utf-8") as f:
         print("Зашифровано (hex):")
         print(f.read()[:100] + "...")
 
     encryptor.decrypt_file("test_xor.txt", "test_xor_decoded.txt")
 
     print("\nРасшифрованный файл:")
-    with open("test_xor_decoded.txt", 'r', encoding='utf-8') as f:
+    with open("test_xor_decoded.txt", "r", encoding="utf-8") as f:
         print(f.read())
 
     # ===== Тест 4: Смена стратегии на лету =====
@@ -281,7 +281,7 @@ def main():
     encryptor.decrypt_file("test_caesar_10.txt", "test_caesar_10_decoded.txt")
 
     print("Расшифрованный файл:")
-    with open("test_caesar_10_decoded.txt", 'r', encoding='utf-8') as f:
+    with open("test_caesar_10_decoded.txt", "r", encoding="utf-8") as f:
         print(f.read())
 
 if __name__ == "__main__":
