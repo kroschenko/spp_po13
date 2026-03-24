@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import os
 from typing import Optional
 
+
 class EncryptionStrategy(ABC):
     """Абстрактный класс стратегии шифрования"""
 
@@ -214,6 +215,7 @@ class FileEncryptor:
         """Получить название текущей стратегии"""
         return self._strategy.name if self._strategy else "Не установлена"
 
+
 def main():
     """Демонстрация работы шифровщика"""
 
@@ -283,6 +285,7 @@ def main():
     print("Расшифрованный файл:")
     with open("test_caesar_10_decoded.txt", "r", encoding="utf-8") as f:
         print(f.read())
+
 
 if __name__ == "__main__":
     main()
