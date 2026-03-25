@@ -5,8 +5,8 @@ def parse_int_list(raw: str) -> list[int]:
     for item in raw.split():
         try:
             nums.append(int(item))
-        except ValueError:
-             raise ValueError(f"'{item}' не является целым числом") from exc
+        except ValueError as exc:
+            raise ValueError(f"'{item}' не является целым числом") from exc
     return nums
 
 
