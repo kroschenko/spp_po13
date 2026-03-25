@@ -37,4 +37,3 @@ def delete(db: Session, company_id: int):
     db.delete(obj)
     db.commit()
     return True
-
