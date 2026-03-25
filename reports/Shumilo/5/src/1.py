@@ -114,7 +114,7 @@ def create_counterparty(data: CounterpartyCreate, db: Session = Depends(get_db))
 
 
 @app.put("/counterparties/{counterparty_id}", response_model=CounterpartyOut)
-def update_counterparty(counterparty_id: int, data: CounterpartyUpdate, 
+def update_counterparty(counterparty_id: int, data: CounterpartyUpdate,
                         db: Session = Depends(get_db)):
     obj = counterparties.update(db, counterparty_id, data)
     if not obj:
