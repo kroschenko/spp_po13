@@ -1,8 +1,3 @@
-"""
-Анализ активности разработчиков GitHub-репозитория.
-Получение статистики по коммитам, PR и issues.
-"""
-
 import requests
 import matplotlib.pyplot as plt
 
