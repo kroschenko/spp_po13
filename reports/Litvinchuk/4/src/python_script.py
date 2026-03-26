@@ -15,7 +15,6 @@ def get_json(url):
     return requests.get(url, timeout=TIMEOUT).json()
 
 
-# pylint: disable=too-many-locals
 def main():
     """Основная функция программы."""
     while True:
