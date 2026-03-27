@@ -1,8 +1,8 @@
+from datetime import datetime
+
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Text, DateTime
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
-from datetime import datetime
-
 DATABASE_URL = "postgresql"
 
 engine = create_engine(DATABASE_URL, echo=True)
