@@ -2,8 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 import math
 import time
-from PIL import ImageGrab
 import colorsys
+
+from PIL import ImageGrab
 
 
 class RotatingSegment:
@@ -27,18 +28,18 @@ class RotatingSegment:
 
     def get_color(self):
         r, g, b = colorsys.hsv_to_rgb(self.hue, 1, 1)
-        return f'#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}'
+        return f'#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}'
 
 
 class App:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, master):
+        self.root = master
         self.root.title("Rotating Segment")
 
-        self.canvas = tk.Canvas(root, width=600, height=400, bg="white")
+        self.canvas = tk.Canvas(self.root, width=600, height=400, bg="white")
         self.canvas.pack()
 
-        control_frame = ttk.Frame(root)
+        control_frame = ttk.Frame(self.root)
         control_frame.pack()
 
         ttk.Label(control_frame, text="Скорость:").grid(row=0, column=0)

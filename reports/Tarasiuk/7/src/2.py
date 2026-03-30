@@ -1,44 +1,69 @@
 import turtle
-import math
 
-def draw_square(t, size):
+
+def draw_square(turtle_obj, side_length):
     for _ in range(4):
-        t.forward(size)
-        t.left(90)
+        turtle_obj.forward(side_length)
+        turtle_obj.left(90)
 
-def pythagoras_tree(t, size, depth, angle, scale):
-    if depth == 0:
+
+def pythagoras_tree(turtle_obj, side_length, depth_val, angle_val, scale_val):
+    if depth_val == 0:
         return
 
-    draw_square(t, size)
+    draw_square(turtle_obj, side_length)
 
-    pos = t.position()
-    heading = t.heading()
+    pos = turtle_obj.position()
+    heading = turtle_obj.heading()
 
-    t.forward(size)
+    turtle_obj.forward(side_length)
 
-    t.left(angle)
-    pythagoras_tree(t, size * scale, depth - 1, angle, scale)
+    turtle_obj.left(angle_val)
+    pythagoras_tree(
+        turtle_obj,
+        side_length * scale_val,
+        depth_val - 1,
+        angle_val,
+        scale_val
+    )
 
-    t.setposition(pos)
-    t.setheading(heading)
-    t.forward(size)
+    turtle_obj.setposition(pos)
+    turtle_obj.setheading(heading)
+    turtle_obj.forward(side_length)
 
-    t.right(90 - angle)
-    pythagoras_tree(t, size * scale, depth - 1, angle, scale)
+    turtle_obj.right(90 - angle_val)
+    pythagoras_tree(
+        turtle_obj,
+        side_length * scale_val,
+        depth_val - 1,
+        angle_val,
+        scale_val
+    )
 
-    t.setposition(pos)
-    t.setheading(heading)
+    turtle_obj.setposition(pos)
+    turtle_obj.setheading(heading)
 
-depth = int(input("Глубина рекурсии: "))
-size = int(input("Размер квадрата: "))
-angle = int(input("Угол (градусы): "))
-scale = float(input("Коэффициент масштаба (0.5–0.8): "))
 
-t = turtle.Turtle()
-t.speed(0)
-t.left(90)
+def main():
+    depth_input = int(input("Глубина рекурсии: "))
+    size_input = int(input("Размер квадрата: "))
+    angle_input = int(input("Угол (градусы): "))
+    scale_input = float(input("Коэффициент масштаба (0.5–0.8): "))
 
-pythagoras_tree(t, size, depth, angle, scale)
+    turtle_obj = turtle.Turtle()
+    turtle_obj.speed(0)
+    turtle_obj.left(90)
 
-turtle.done()
+    pythagoras_tree(
+        turtle_obj,
+        size_input,
+        depth_input,
+        angle_input,
+        scale_input
+    )
+
+    turtle.done()
+
+
+if __name__ == "__main__":
+    main()
