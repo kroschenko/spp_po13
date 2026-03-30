@@ -1,5 +1,4 @@
 import sys
-import datetime
 import numpy as np
 from PySide6.QtWidgets import (
     QApplication,
@@ -93,7 +92,7 @@ class FractalCanvas(QWidget):
         self.image = self.image.copy()
         self.update()
 
-    def paintEvent(self, event):
+    def paintEvent(self):
         """Метод отрисовки виджета."""
         if not self.image.isNull():
             painter = QPainter(self)

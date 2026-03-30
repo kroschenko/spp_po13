@@ -92,7 +92,7 @@ class Canvas(QWidget):
             self.points, key=lambda point: self.line.get_distance(point)
         )
 
-    def paintEvent(self, event):
+    def paintEvent(self):
         """Метод отрисовки всех графических примитивов."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
