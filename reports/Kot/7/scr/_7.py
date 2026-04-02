@@ -17,6 +17,39 @@ class PeanoCurve:
     def conjugate_seq(self, seq):
         return [complex(x.real, -x.imag) for x in seq]
 
+    def _get_base_code(self):
+        """Базовый код первого подразделения"""
+        return [1j, 1j, 1, -1j, -1j, 1, 1j, 1j]
+
+    def _build_segment_1(self, d_prev, i_d, i_conj, result):
+        """Первый сегмент: d_n + i + i*d_n + i + i*conj(d_n) + 1"""
+        result.extend(d_prev)
+        result.append(1j)
+        result.extend(i_d)
+        result.append(1j)
+        result.extend(i_conj)
+        result.append(1)
+        return result
+
+    def _build_segment_2(self, d_conj, d_prev, result):
+        """Второй сегмент: conj(d_n) - i - i*conj(d_n) - i - i*d_n + 1"""
+        result.extend(d_conj)
+        result.append(-1j)
+        result.extend(self.apply_rotation(d_conj, -1j))
+        result.append(-1j)
+        result.extend(self.apply_rotation(d_prev, -1j))
+        result.append(1)
+        return result
+
+    def _build_segment_3(self, d_prev, i_d, i_conj, result):
+        """Третий сегмент: d_n + i + i*d_n + i + i*conj(d_n)"""
+        result.extend(d_prev)
+        result.append(1j)
+        result.extend(i_d)
+        result.append(1j)
+        result.extend(i_conj)
+        return result
+
     def generate_code(self, n):
         if n in self.code_cache:
             return self.code_cache[n]
@@ -24,11 +57,10 @@ class PeanoCurve:
         if n == 0:
             return []
 
-        d0 = [1j, 1j, 1, -1j, -1j, 1, 1j, 1j]
-
         if n == 1:
-            self.code_cache[n] = d0
-            return d0
+            base_code = self._get_base_code()
+            self.code_cache[n] = base_code
+            return base_code
 
         d_prev = self.generate_code(n - 1)
         d_conj = self.conjugate_seq(d_prev)
@@ -36,23 +68,9 @@ class PeanoCurve:
         i_conj = self.apply_rotation(d_conj, 1j)
 
         result = []
-        result.extend(d_prev)
-        result.append(1j)
-        result.extend(i_d)
-        result.append(1j)
-        result.extend(i_conj)
-        result.append(1)
-        result.extend(d_conj)
-        result.append(-1j)
-        result.extend(self.apply_rotation(d_conj, -1j))
-        result.append(-1j)
-        result.extend(self.apply_rotation(d_prev, -1j))
-        result.append(1)
-        result.extend(d_prev)
-        result.append(1j)
-        result.extend(i_d)
-        result.append(1j)
-        result.extend(i_conj)
+        result = self._build_segment_1(d_prev, i_d, i_conj, result)
+        result = self._build_segment_2(d_conj, d_prev, result)
+        result = self._build_segment_3(d_prev, i_d, i_conj, result)
 
         self.code_cache[n] = result
         return result
