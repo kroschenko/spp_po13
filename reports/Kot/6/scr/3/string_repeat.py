@@ -2,6 +2,7 @@
 
 
 def repeat(pattern, repetitions):
+    """Efficient string repetition using multiplication operator."""
     # Check pattern type
     if not isinstance(pattern, str):
         raise TypeError("pattern must be a string")
@@ -14,65 +15,64 @@ def repeat(pattern, repetitions):
     if repetitions < 0:
         raise ValueError("repeat count must be non-negative")
 
-    # Optimization for common cases
-    if repetitions == 0:
-        return ""
-
-    if repetitions == 1:
-        return pattern
-
     # Use string multiplication for efficient repetition
-    # This is the most efficient way in Python
     return pattern * repetitions
 
 
-# Альтернативная реализация, которая показывает процесс конкатенации
-def repeat_explicit(pattern, repetitions):
-    if not isinstance(pattern, str):
+def repeat_explicit(input_pattern, repeat_count):
+    """
+    Alternative implementation showing concatenation process.
+
+    Args:
+        input_pattern: String pattern to repeat
+        repeat_count: Number of repetitions (non-negative integer)
+    """
+    if not isinstance(input_pattern, str):
         raise TypeError("pattern must be a string")
 
-    if not isinstance(repetitions, int):
+    if not isinstance(repeat_count, int):
         raise TypeError("repeat count must be an integer")
 
-    if repetitions < 0:
+    if repeat_count < 0:
         raise ValueError("repeat count must be non-negative")
 
-    result = ""
-    for i in range(repetitions):
-        result += pattern
+    concatenated_result = ""
+    for step_index in range(repeat_count):
+        concatenated_result += input_pattern
         # Debug output to show concatenation process
-        print(f"Step {i+1}: result = '{result}'")
+        print(f"Step {step_index + 1}: result = '{concatenated_result}'")
 
-    return result
+    return concatenated_result
 
 
-# Функция для демонстрации работы с отладкой
-def repeat_with_debug(pattern, repetitions):
-    if not isinstance(pattern, str):
+def repeat_with_debug(input_pattern, repeat_count):
+    """Function with debug output to demonstrate string repetition."""
+    if not isinstance(input_pattern, str):
         raise TypeError("pattern must be a string")
 
-    if not isinstance(repetitions, int):
+    if not isinstance(repeat_count, int):
         raise TypeError("repeat count must be an integer")
 
-    if repetitions < 0:
+    if repeat_count < 0:
         raise ValueError("repeat count must be non-negative")
 
-    print(f"Pattern: '{pattern}' (length: {len(pattern)})")
-    print(f"Repetitions: {repetitions}")
+    print("Pattern: '{}' (length: {})".format(input_pattern, len(input_pattern)))
+    print("Repetitions: {}".format(repeat_count))
 
-    result = pattern * repetitions
+    final_result = input_pattern * repeat_count
 
-    print(f"Result: '{result}'")
-    print(f"Result length: {len(result)}")
+    print("Result: '{}'".format(final_result))
+    print("Result length: {}".format(len(final_result)))
 
     # Show character by character breakdown
     print("Character breakdown:")
-    for i, char in enumerate(result):
+    for position, current_char in enumerate(final_result):
+        ascii_val = ord(current_char) if ord(current_char) < 128 else "unicode"
         print(
-            f"  Position {i}: '{char}' (ASCII: {ord(char) if ord(char) < 128 else 'unicode'})"
+            "  Position {}: '{}' (ASCII: {})".format(position, current_char, ascii_val)
         )
 
-    return result
+    return final_result
 
 
 if __name__ == "__main__":
@@ -81,9 +81,9 @@ if __name__ == "__main__":
 
     # Test examples from specification
     print("\n1. Testing specification examples:")
-    print(f'  repeat("e", 0) = "{repeat("e", 0)}"')
-    print(f'  repeat("e", 3) = "{repeat("e", 3)}"')
-    print(f'  repeat(" ABC ", 2) = "{repeat(" ABC ", 2)}"')
+    print('  repeat("e", 0) = "{}"'.format(repeat("e", 0)))
+    print('  repeat("e", 3) = "{}"'.format(repeat("e", 3)))
+    print('  repeat(" ABC ", 2) = "{}"'.format(repeat(" ABC ", 2)))
 
     # Test with debug to understand the issue
     print("\n2. Debug mode for ' ABC ' pattern:")
@@ -96,21 +96,21 @@ if __name__ == "__main__":
     print("\n4. Testing error cases:")
     try:
         repeat("e", -2)
-    except ValueError as e:
-        print(f'  repeat("e", -2) -> ValueError: {e}')
+    except ValueError as err:
+        print('  repeat("e", -2) -> ValueError: {}'.format(err))
 
     try:
         repeat(None, 1)
-    except TypeError as e:
-        print(f"  repeat(None, 1) -> TypeError: {e}")
+    except TypeError as err:
+        print("  repeat(None, 1) -> TypeError: {}".format(err))
 
     print("\n5. Understanding the result:")
-    pattern = " ABC "
-    result = repeat(pattern, 2)
-    print(f'  Pattern: "{pattern}"')
-    print(f'  Result: "{result}"')
-    print(f'  Expected: " ABCABC "')
-    print(f'  Are they equal? {result == " ABCABC "}')
-    print(f"  Result characters:")
-    for i, char in enumerate(result):
-        print(f'    {i}: "{char}"')
+    test_pattern = " ABC "
+    test_result = repeat(test_pattern, 2)
+    print('  Pattern: "{}"'.format(test_pattern))
+    print('  Result: "{}"'.format(test_result))
+    print('  Expected: " ABC  ABC "')
+    print("  Are they equal? {}".format(test_result == " ABC  ABC "))
+    print("  Result characters:")
+    for idx, ch in enumerate(test_result):
+        print('    {}: "{}"'.format(idx, ch))
