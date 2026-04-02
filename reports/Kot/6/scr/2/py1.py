@@ -110,19 +110,18 @@ def main():
         # Display additional statistics
         stats = get_statistics(numbers)
         print("\nStatistics:")
-        print("  Median:", stats["median"])
-        print("  Mean: {:.2f}".format(stats["mean"]))
-        print("  Min:", stats["min"])
-        print("  Max:", stats["max"])
-        print("  Outlier distance from median:", stats["outlier_distance"])
+        print(f"  Median: {stats['median']}")
+        print(f"  Mean: {stats['mean']:.2f}")
+        print(f"  Min: {stats['min']}")
+        print(f"  Max: {stats['max']}")
+        print(f"  Outlier distance from median: {stats['outlier_distance']}")
 
     except ValueError as err:
-        print("Error:", err)
+        print(f"Error: {err}")
     except TypeError as err:
-        print("Error:", err)
+        print(f"Error: {err}")
     except (OverflowError, ArithmeticError, ZeroDivisionError) as err:
-        # Исправление: более конкретные исключения вместо общего Exception
-        print("Unexpected error:", err)
+        print(f"Unexpected error: {err}")
 
 
 if __name__ == "__main__":
