@@ -21,33 +21,51 @@ class PeanoCurve:
         """Базовый код первого подразделения"""
         return [1j, 1j, 1, -1j, -1j, 1, 1j, 1j]
 
-    def _build_segment_1(self, d_prev, i_d, i_conj, result):
-        """Первый сегмент: d_n + i + i*d_n + i + i*conj(d_n) + 1"""
+    def _build_segment_1_part1(self, d_prev, i_d, result):
+        """d_n + i + i*d_n + i"""
         result.extend(d_prev)
         result.append(1j)
         result.extend(i_d)
         result.append(1j)
+        return result
+
+    def _build_segment_1_part2(self, i_conj, result):
+        """i*conj(d_n) + 1"""
         result.extend(i_conj)
         result.append(1)
         return result
 
-    def _build_segment_2(self, d_conj, d_prev, result):
-        """Второй сегмент: conj(d_n) - i - i*conj(d_n) - i - i*d_n + 1"""
+    def _build_segment_2_part1(self, d_conj, result):
+        """conj(d_n) - i - i*conj(d_n) - i"""
         result.extend(d_conj)
         result.append(-1j)
         result.extend(self.apply_rotation(d_conj, -1j))
         result.append(-1j)
+        return result
+
+    def _build_segment_2_part2(self, d_prev, result):
+        """-i*d_n + 1"""
         result.extend(self.apply_rotation(d_prev, -1j))
         result.append(1)
         return result
 
     def _build_segment_3(self, d_prev, i_d, i_conj, result):
-        """Третий сегмент: d_n + i + i*d_n + i + i*conj(d_n)"""
+        """d_n + i + i*d_n + i + i*conj(d_n)"""
         result.extend(d_prev)
         result.append(1j)
         result.extend(i_d)
         result.append(1j)
         result.extend(i_conj)
+        return result
+
+    def _build_full_code(self, d_prev, d_conj, i_d, i_conj):
+        """Сборка полного кода из сегментов"""
+        result = []
+        result = self._build_segment_1_part1(d_prev, i_d, result)
+        result = self._build_segment_1_part2(i_conj, result)
+        result = self._build_segment_2_part1(d_conj, result)
+        result = self._build_segment_2_part2(d_prev, result)
+        result = self._build_segment_3(d_prev, i_d, i_conj, result)
         return result
 
     def generate_code(self, n):
@@ -67,11 +85,7 @@ class PeanoCurve:
         i_d = self.apply_rotation(d_prev, 1j)
         i_conj = self.apply_rotation(d_conj, 1j)
 
-        result = []
-        result = self._build_segment_1(d_prev, i_d, i_conj, result)
-        result = self._build_segment_2(d_conj, d_prev, result)
-        result = self._build_segment_3(d_prev, i_d, i_conj, result)
-
+        result = self._build_full_code(d_prev, d_conj, i_d, i_conj)
         self.code_cache[n] = result
         return result
 
