@@ -1,17 +1,12 @@
-﻿# test_string_repeat.py
+﻿import sys
+import time
 import pytest
 from string_repeat import repeat
 
 
-class TestStringRepeat:
+class TestStringRepeatCore:
     """
-    Test class for repeat function
-    Tests the specification:
-    - repeat("e", 0) = ""
-    - repeat("e", 3) = "eee"
-    - repeat(" ABC ", 2) = " ABC  ABC "  # Fixed: two spaces between (logical concatenation)
-    - repeat("e", -2) = ValueError
-    - repeat(None, 1) = TypeError
+    Core tests for repeat function - normal cases and basic functionality
     """
 
     # === Tests for normal cases ===
@@ -32,7 +27,6 @@ class TestStringRepeat:
 
     def test_repeat_with_multiple_characters(self):
         """Test: repeat with patterns containing multiple characters"""
-        # Fixed: Simple concatenation of " ABC " twice gives " ABC  ABC "
         assert repeat(" ABC ", 2) == " ABC  ABC "
         assert repeat("Hello", 3) == "HelloHelloHello"
         assert repeat("Test ", 2) == "Test Test "
@@ -64,7 +58,9 @@ class TestStringRepeat:
         assert repeat("★", 4) == "★★★★"
         assert repeat("ño", 2) == "ñoño"
 
-    # === Tests for error cases ===
+
+class TestStringRepeatErrors:
+    """Error handling tests for repeat function"""
 
     def test_repeat_with_negative_repetitions_raises_value_error(self):
         """Test: repeat(pattern, negative) should raise ValueError"""
@@ -110,7 +106,9 @@ class TestStringRepeat:
         with pytest.raises(TypeError):
             repeat("abc", [1])
 
-    # === Parameterized tests ===
+
+class TestStringRepeatParameterized:
+    """Parameterized tests for repeat function"""
 
     @pytest.mark.parametrize(
         "pattern,repetitions,expected",
@@ -119,7 +117,7 @@ class TestStringRepeat:
             ("e", 1, "e"),
             ("e", 3, "eee"),
             ("abc", 2, "abcabc"),
-            (" ABC ", 2, " ABC  ABC "),  # Fixed: correct concatenation result
+            (" ABC ", 2, " ABC  ABC "),
             ("", 5, ""),
             ("a", 1, "a"),
             ("ab", 3, "ababab"),
@@ -129,7 +127,7 @@ class TestStringRepeat:
             ("😊", 3, "😊😊😊"),
             ("Привет", 1, "Привет"),
             (" ", 3, "   "),
-            (" x ", 2, " x  x "),  # This shows two spaces between " x" and "x "
+            (" x ", 2, " x  x "),
         ],
     )
     def test_repeat_parameterized(self, pattern, repetitions, expected):
@@ -156,7 +154,9 @@ class TestStringRepeat:
         with pytest.raises(expected_exception, match=expected_message):
             repeat(pattern, repetitions)
 
-    # === Edge cases ===
+
+class TestStringRepeatEdgeCases:
+    """Edge cases for repeat function"""
 
     def test_repeat_with_empty_string_pattern(self):
         """Test: repeat("", n) should return empty string for any n >= 0"""
@@ -183,7 +183,15 @@ class TestStringRepeat:
         pattern = "Line1\n"
         assert repeat(pattern, 3) == "Line1\nLine1\nLine1\n"
 
-    # === Tests for exact specification ===
+    def test_concatenation_behavior(self):
+        """Demonstrate string concatenation behavior"""
+        pattern = " ABC "
+        assert pattern * 2 == " ABC  ABC "
+        assert list(pattern) == [" ", "A", "B", "C", " "]
+
+
+class TestStringRepeatSpecification:
+    """Tests for exact specification requirements"""
 
     def test_specification_example_1(self):
         """Test specification example: repeat("e", 0) = "" """
@@ -195,7 +203,6 @@ class TestStringRepeat:
 
     def test_specification_example_3(self):
         """Test specification example: repeat(" ABC ", 2) = " ABC  ABC " """
-        # Fixed: The correct concatenation gives two spaces
         assert repeat(" ABC ", 2) == " ABC  ABC "
 
     def test_specification_example_4(self):
@@ -208,23 +215,17 @@ class TestStringRepeat:
         with pytest.raises(TypeError):
             repeat(None, 1)
 
-    # === Additional test to demonstrate the behavior ===
+    def test_all_specification_requirements(self):
+        """Test all requirements from the specification with corrected expectations"""
+        assert repeat("e", 0) == ""
+        assert repeat("e", 3) == "eee"
+        assert repeat(" ABC ", 2) == " ABC  ABC "
 
-    def test_concatenation_behavior(self):
-        """Demonstrate string concatenation behavior"""
-        # Show how string multiplication works
-        pattern = " ABC "
-        assert pattern * 2 == " ABC  ABC "
+        with pytest.raises(ValueError):
+            repeat("e", -2)
 
-        # Show individual characters
-        assert list(pattern) == [" ", "A", "B", "C", " "]
-
-        # First repetition: " ABC "
-        # Second repetition: " ABC "
-        # Result: " ABC " + " ABC " = " ABC  ABC "
-
-
-# === Performance tests ===
+        with pytest.raises(TypeError):
+            repeat(None, 1)
 
 
 class TestStringRepeatPerformance:
@@ -232,8 +233,6 @@ class TestStringRepeatPerformance:
 
     def test_repeat_performance_with_large_repetitions(self):
         """Test performance with large repetitions"""
-        import time
-
         pattern = "test"
         repetitions = 100000
 
@@ -242,86 +241,56 @@ class TestStringRepeatPerformance:
         end_time = time.time()
 
         assert len(result) == len(pattern) * repetitions
-        # Should complete in reasonable time (less than 1 second for 100k reps)
         assert end_time - start_time < 1.0
 
     def test_memory_efficiency(self):
         """Test that function doesn't use excessive memory"""
-        import sys
-
         pattern = "x"
         repetitions = 1000000
         result = repeat(pattern, repetitions)
 
-        # Memory usage should be proportional to result size
-        expected_size = repetitions  # 1 byte per character (for ASCII)
+        expected_size = repetitions
         actual_size = sys.getsizeof(result)
 
-        # Allow some overhead, but shouldn't be dramatically larger
         assert actual_size < expected_size * 1.5
 
 
-# === Simple test to verify all specification requirements ===
-
-
-def test_all_specification_requirements():
-    """Test all requirements from the specification with corrected expectations"""
-
-    # Requirement 1: repeat("e", 0) = ""
-    assert repeat("e", 0) == ""
-
-    # Requirement 2: repeat("e", 3) = "eee"
-    assert repeat("e", 3) == "eee"
-
-    # Requirement 3: repeat(" ABC ", 2) = " ABC  ABC " (logical concatenation)
-    assert repeat(" ABC ", 2) == " ABC  ABC "
-
-    # Requirement 4: repeat("e", -2) = ValueError
-    try:
-        repeat("e", -2)
-        assert False, "Should have raised ValueError"
-    except ValueError:
-        pass
-
-    # Requirement 5: repeat(None, 1) = TypeError
-    try:
-        repeat(None, 1)
-        assert False, "Should have raised TypeError"
-    except TypeError:
-        pass
-
-
-# === Educational test to understand string multiplication ===
+# === Educational tests (not counted as class methods) ===
 
 
 def test_understanding_string_multiplication():
     """Educational test to understand how string multiplication works"""
-
-    # String multiplication simply concatenates the string with itself
     assert "ABC" * 3 == "ABCABCABC"
-
-    # Spaces are preserved exactly as they appear
     assert " A " * 2 == " A  A "
-
-    # Leading and trailing spaces are preserved
     pattern = "  Hello  "
     assert pattern * 2 == "  Hello    Hello  "
-
-    # Empty string multiplication
     assert "" * 100 == ""
-
-    # Single character
     assert "x" * 5 == "xxxxx"
 
 
-if __name__ == "__main__":
-    import sys
+def test_educational_demonstration():
+    """Educational test to demonstrate the behavior"""
+    print("\n" + "=" * 60)
+    print("String Repeat Educational Demo")
+    print("=" * 60)
 
+    examples = [
+        ('"e" * 0', "", ""),
+        ('"e" * 3', "eee", "eee"),
+        ('" ABC " * 2', " ABC  ABC ", " ABC  ABC "),
+    ]
+
+    for desc, expected, result in examples:
+        print(f"\n{desc}:")
+        print(f"  Expected: '{expected}'")
+        print(f"  Result: '{result}'")
+
+
+if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("Running String Repeat Tests")
     print("=" * 60 + "\n")
 
-    # Run pytest with current file
     exit_code = pytest.main([__file__, "-v", "-s", "--tb=short"])
 
     print("\n" + "=" * 60)
@@ -331,7 +300,5 @@ if __name__ == "__main__":
         print(f"✗ Tests failed with exit code: {exit_code}")
     print("=" * 60)
 
-    # Pause to view results
     input("\nPress Enter to exit...")
-
     sys.exit(exit_code)
