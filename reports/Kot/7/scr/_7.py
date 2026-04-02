@@ -107,7 +107,7 @@ class PeanoCurve:
         return points
 
 
-class PeanoFractalApp:
+class PeanoFractalApp:  # pylint: disable=attribute-defined-outside-init
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Кривая Пеано")
