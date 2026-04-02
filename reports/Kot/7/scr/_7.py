@@ -113,7 +113,24 @@ class PeanoFractalApp:
         self.root.title("Кривая Пеано")
         self.root.geometry("1200x800")
 
-        # Параметры
+        # Инициализация переменных
+        self._init_variables()
+
+        # Инициализация атрибутов виджетов
+        self._init_widget_attributes()
+
+        self.curve = PeanoCurve()
+
+        self.create_widgets()
+        self.setup_canvas()
+
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        # Начальный предпросмотр
+        self.root.after(100, self.preview_fractal)
+
+    def _init_variables(self):
+        """Инициализация переменных параметров"""
         self.iterations = tk.IntVar(value=2)
         self.calibre = tk.IntVar(value=10)
         self.speed = tk.IntVar(value=5)
@@ -124,7 +141,8 @@ class PeanoFractalApp:
         self.points = []
         self.scaled_points = []
 
-        # Инициализация атрибутов виджетов
+    def _init_widget_attributes(self):
+        """Инициализация атрибутов виджетов"""
         self.iter_scale = None
         self.calibre_scale = None
         self.speed_scale = None
@@ -138,16 +156,6 @@ class PeanoFractalApp:
         self.progress_label = None
         self.canvas = None
         self.canvas_frame = None
-
-        self.curve = PeanoCurve()
-
-        self.create_widgets()
-        self.setup_canvas()
-
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-        # Начальный предпросмотр
-        self.root.after(100, self.preview_fractal)
 
     def create_widgets(self):
         control_frame = self._create_control_frame()
@@ -340,74 +348,27 @@ class PeanoFractalApp:
         ys = [p[1] for p in self.points]
         return min(xs), max(xs), min(ys), max(ys)
 
-    def _calculate_scale(self, bounds, canvas_size):
-        """Вычисление масштаба"""
-        min_x, max_x, min_y, max_y = bounds
-        canvas_width, canvas_height = canvas_size
-
-        fractal_width = max_x - min_x
-        fractal_height = max_y - min_y
-
-        if fractal_width > 0 and fractal_height > 0:
-            scale_x = canvas_width / fractal_width
-            scale_y = canvas_height / fractal_height
-            return min(scale_x, scale_y, 4)
-        return 1
-
-    def _scale_points(
-        self, center_x, center_y, scale, left, top, canvas_width, canvas_height
-    ):
-        """Масштабирование точек"""
-        self.scaled_points = []
-        for x, y in self.points:
-            screen_x = left + canvas_width / 2 + (x - center_x) * scale
-            screen_y = top + canvas_height / 2 - (y - center_y) * scale
-            self.scaled_points.append((screen_x, screen_y))
-
-    def preview_fractal(self):
-        if self.is_drawing:
-            return
-
-        if not self._generate_and_get_points():
-            return
-
-        bounds = self._get_fractal_bounds()
-        left, top, canvas_width, canvas_height = self._get_canvas_dimensions()
-
-        center_x = (bounds[0] + bounds[1]) / 2
-        center_y = (bounds[2] + bounds[3]) / 2
-
-        scale = self._calculate_scale(bounds, (canvas_width, canvas_height))
-
-        self._scale_points(
-            center_x, center_y, scale, left, top, canvas_width, canvas_height
-        )
-
-        self.redraw_fractal()
-        self.update_info()
-
-    def _generate_and_get_points(self):
+    def _generate_points(self):
         """Генерация точек фрактала"""
         code = self.curve.generate_code(self.iterations.get())
         self.points = self.curve.get_points(code, self.calibre.get())
         return bool(self.points)
 
-    def _get_canvas_dimensions(self):
+    def _get_canvas_size(self):
         """Получение размеров canvas"""
         left, right, top, bottom = self.get_canvas_bounds()
-        canvas_width = right - left
-        canvas_height = bottom - top
-        return left, top, canvas_width, canvas_height
+        return left, top, right - left, bottom - top
 
-    def _compute_center_and_scale(
-        self, min_x, max_x, min_y, max_y, canvas_width, canvas_height
-    ):
+    def _calc_center_and_scale(self):
         """Вычисление центра и масштаба"""
-        center_x = (min_x + max_x) / 2
-        center_y = (min_y + max_y) / 2
+        bounds = self._get_fractal_bounds()
+        left, top, canvas_width, canvas_height = self._get_canvas_size()
 
-        fractal_width = max_x - min_x
-        fractal_height = max_y - min_y
+        center_x = (bounds[0] + bounds[1]) / 2
+        center_y = (bounds[2] + bounds[3]) / 2
+
+        fractal_width = bounds[1] - bounds[0]
+        fractal_height = bounds[3] - bounds[2]
 
         if fractal_width > 0 and fractal_height > 0:
             scale_x = canvas_width / fractal_width
@@ -416,26 +377,26 @@ class PeanoFractalApp:
         else:
             scale = 1
 
-        return center_x, center_y, scale
+        return center_x, center_y, scale, left, top, canvas_width, canvas_height
+
+    def _apply_scaling(self, params):
+        """Применение масштабирования к точкам"""
+        center_x, center_y, scale, left, top, canvas_width, canvas_height = params
+        self.scaled_points = []
+        for x, y in self.points:
+            screen_x = left + canvas_width / 2 + (x - center_x) * scale
+            screen_y = top + canvas_height / 2 - (y - center_y) * scale
+            self.scaled_points.append((screen_x, screen_y))
 
     def preview_fractal(self):
+        """Предпросмотр фрактала"""
         if self.is_drawing:
             return
-
-        if not self._generate_and_get_points():
+        if not self._generate_points():
             return
 
-        min_x, max_x, min_y, max_y = self._get_fractal_bounds()
-        left, top, canvas_width, canvas_height = self._get_canvas_dimensions()
-
-        center_x, center_y, scale = self._compute_center_and_scale(
-            min_x, max_x, min_y, max_y, canvas_width, canvas_height
-        )
-
-        self._scale_points(
-            center_x, center_y, scale, left, top, canvas_width, canvas_height
-        )
-
+        params = self._calc_center_and_scale()
+        self._apply_scaling(params)
         self.redraw_fractal()
         self.update_info()
 
@@ -583,7 +544,7 @@ class PeanoFractalApp:
             if not os.path.exists("screenshots"):
                 os.makedirs("screenshots")
 
-            timestamp = datetime.now().strftime("%Y%m%d_H%M%S")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"screenshots/peano_{timestamp}.png"
 
             self.root.update()
