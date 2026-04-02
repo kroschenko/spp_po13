@@ -150,19 +150,10 @@ class PeanoFractalApp:
         self.root.after(100, self.preview_fractal)
 
     def create_widgets(self):
-        # Панель управления
         control_frame = self._create_control_frame()
-
-        # Параметры
         self._create_params_frame(control_frame)
-
-        # Информация
         self._create_info_frame(control_frame)
-
-        # Кнопки
         self._create_buttons_frame(control_frame)
-
-        # Прогресс
         self._create_progress_frame(control_frame)
 
     def _create_control_frame(self):
@@ -343,6 +334,33 @@ class PeanoFractalApp:
         margin = 50
         return margin, width - margin, margin, height - margin
 
+    def _get_fractal_bounds(self):
+        """Получение границ фрактала"""
+        xs = [p[0] for p in self.points]
+        ys = [p[1] for p in self.points]
+        return min(xs), max(xs), min(ys), max(ys)
+
+    def _calculate_scale(self, min_x, max_x, min_y, max_y, canvas_width, canvas_height):
+        """Вычисление масштаба"""
+        fractal_width = max_x - min_x
+        fractal_height = max_y - min_y
+
+        if fractal_width > 0 and fractal_height > 0:
+            scale_x = canvas_width / fractal_width
+            scale_y = canvas_height / fractal_height
+            return min(scale_x, scale_y, 4)
+        return 1
+
+    def _scale_points(
+        self, center_x, center_y, scale, left, top, canvas_width, canvas_height
+    ):
+        """Масштабирование точек"""
+        self.scaled_points = []
+        for x, y in self.points:
+            screen_x = left + canvas_width / 2 + (x - center_x) * scale
+            screen_y = top + canvas_height / 2 - (y - center_y) * scale
+            self.scaled_points.append((screen_x, screen_y))
+
     def preview_fractal(self):
         if self.is_drawing:
             return
@@ -353,36 +371,43 @@ class PeanoFractalApp:
         if not self.points:
             return
 
-        xs = [p[0] for p in self.points]
-        ys = [p[1] for p in self.points]
-        min_x, max_x = min(xs), max(xs)
-        min_y, max_y = min(ys), max(ys)
-
+        min_x, max_x, min_y, max_y = self._get_fractal_bounds()
         left, right, top, bottom = self.get_canvas_bounds()
         canvas_width = right - left
         canvas_height = bottom - top
 
         center_x = (min_x + max_x) / 2
         center_y = (min_y + max_y) / 2
+        scale = self._calculate_scale(
+            min_x, max_x, min_y, max_y, canvas_width, canvas_height
+        )
 
-        fractal_width = max_x - min_x
-        fractal_height = max_y - min_y
-
-        if fractal_width > 0 and fractal_height > 0:
-            scale_x = canvas_width / fractal_width
-            scale_y = canvas_height / fractal_height
-            scale = min(scale_x, scale_y, 4)
-        else:
-            scale = 1
-
-        self.scaled_points = []
-        for x, y in self.points:
-            screen_x = left + canvas_width / 2 + (x - center_x) * scale
-            screen_y = top + canvas_height / 2 - (y - center_y) * scale
-            self.scaled_points.append((screen_x, screen_y))
+        self._scale_points(
+            center_x, center_y, scale, left, top, canvas_width, canvas_height
+        )
 
         self.redraw_fractal()
         self.update_info()
+
+    def _draw_squares(self):
+        """Рисование квадратов цепи"""
+        size = self.calibre.get() * self.get_current_scale()
+        for x, y in self.scaled_points:
+            self.canvas.create_rectangle(
+                x - size / 2,
+                y - size / 2,
+                x + size / 2,
+                y + size / 2,
+                outline="lightgray",
+                fill="",
+            )
+
+    def _draw_lines(self):
+        """Рисование центральной ломаной"""
+        for i in range(len(self.scaled_points) - 1):
+            x1, y1 = self.scaled_points[i]
+            x2, y2 = self.scaled_points[i + 1]
+            self.canvas.create_line(x1, y1, x2, y2, fill="blue", width=2)
 
     def redraw_fractal(self):
         if not hasattr(self, "scaled_points") or not self.scaled_points:
@@ -391,21 +416,9 @@ class PeanoFractalApp:
         self.canvas.delete("all")
 
         if self.show_squares.get():
-            size = self.calibre.get() * self.get_current_scale()
-            for x, y in self.scaled_points:
-                self.canvas.create_rectangle(
-                    x - size / 2,
-                    y - size / 2,
-                    x + size / 2,
-                    y + size / 2,
-                    outline="lightgray",
-                    fill="",
-                )
+            self._draw_squares()
 
-        for i in range(len(self.scaled_points) - 1):
-            x1, y1 = self.scaled_points[i]
-            x2, y2 = self.scaled_points[i + 1]
-            self.canvas.create_line(x1, y1, x2, y2, fill="blue", width=2)
+        self._draw_lines()
 
     def get_current_scale(self):
         if len(self.points) > 1 and len(self.scaled_points) > 1:
@@ -414,6 +427,31 @@ class PeanoFractalApp:
             if dx_orig != 0:
                 return dx_scaled / dx_orig
         return 1
+
+    def _draw_squares_static(self):
+        """Рисование квадратов для анимации"""
+        size = self.calibre.get() * self.get_current_scale()
+        for x, y in self.scaled_points:
+            self.canvas.create_rectangle(
+                x - size / 2,
+                y - size / 2,
+                x + size / 2,
+                y + size / 2,
+                outline="lightgray",
+                fill="",
+                tags="square",
+            )
+
+    def _set_drawing_buttons_state(self, disabled):
+        """Установка состояния кнопок"""
+        if disabled:
+            self.draw_btn.config(state=tk.DISABLED, text="Отрисовка...")
+            self.pause_btn.config(state=tk.NORMAL)
+            self.clear_btn.config(state=tk.DISABLED)
+        else:
+            self.draw_btn.config(state=tk.NORMAL, text="Начать отрисовку")
+            self.pause_btn.config(state=tk.DISABLED)
+            self.clear_btn.config(state=tk.NORMAL)
 
     def start_drawing(self):
         if self.is_drawing:
@@ -432,23 +470,34 @@ class PeanoFractalApp:
         self.canvas.delete("all")
 
         if self.show_squares.get():
-            size = self.calibre.get() * self.get_current_scale()
-            for x, y in self.scaled_points:
-                self.canvas.create_rectangle(
-                    x - size / 2,
-                    y - size / 2,
-                    x + size / 2,
-                    y + size / 2,
-                    outline="lightgray",
-                    fill="",
-                    tags="square",
-                )
+            self._draw_squares_static()
 
-        self.draw_btn.config(state=tk.DISABLED, text="Отрисовка...")
-        self.pause_btn.config(state=tk.NORMAL)
-        self.clear_btn.config(state=tk.DISABLED)
-
+        self._set_drawing_buttons_state(disabled=True)
         self.draw_next()
+
+    def _draw_next_segment(self):
+        """Отрисовка следующего сегмента"""
+        x1, y1 = self.scaled_points[self.current_index]
+        x2, y2 = self.scaled_points[self.current_index + 1]
+
+        self.canvas.create_line(x1, y1, x2, y2, fill="blue", width=2, tags="line")
+        self.canvas.update()
+
+        self.current_index += 1
+        self.progress_bar["value"] = self.current_index
+
+        if len(self.scaled_points) > 1:
+            percent = (self.current_index / (len(self.scaled_points) - 1)) * 100
+            self.progress_label.config(text=f"{percent:.1f}%")
+
+        delay = max(1, 11 - self.speed.get())
+        self.root.after(delay, self.draw_next)
+
+    def _finish_drawing(self):
+        """Завершение отрисовки"""
+        self.is_drawing = False
+        self._set_drawing_buttons_state(disabled=False)
+        self.progress_label.config(text="Готово!")
 
     def draw_next(self):
         if not self.is_drawing:
@@ -459,27 +508,9 @@ class PeanoFractalApp:
             return
 
         if self.current_index < len(self.scaled_points) - 1:
-            x1, y1 = self.scaled_points[self.current_index]
-            x2, y2 = self.scaled_points[self.current_index + 1]
-
-            self.canvas.create_line(x1, y1, x2, y2, fill="blue", width=2, tags="line")
-            self.canvas.update()
-
-            self.current_index += 1
-            self.progress_bar["value"] = self.current_index
-
-            if len(self.scaled_points) > 1:
-                percent = (self.current_index / (len(self.scaled_points) - 1)) * 100
-                self.progress_label.config(text=f"{percent:.1f}%")
-
-            delay = max(1, 11 - self.speed.get())
-            self.root.after(delay, self.draw_next)
+            self._draw_next_segment()
         else:
-            self.is_drawing = False
-            self.draw_btn.config(state=tk.NORMAL, text="Начать отрисовку")
-            self.pause_btn.config(state=tk.DISABLED)
-            self.clear_btn.config(state=tk.NORMAL)
-            self.progress_label.config(text="Готово!")
+            self._finish_drawing()
 
     def toggle_pause(self):
         self.is_paused = not self.is_paused
@@ -495,16 +526,14 @@ class PeanoFractalApp:
         self.canvas.delete("all")
         self.progress_bar["value"] = 0
         self.progress_label.config(text="0%")
-        self.draw_btn.config(state=tk.NORMAL, text="Начать отрисовку")
-        self.pause_btn.config(state=tk.DISABLED)
-        self.clear_btn.config(state=tk.NORMAL)
+        self._set_drawing_buttons_state(disabled=False)
 
     def take_screenshot(self):
         try:
             if not os.path.exists("screenshots"):
                 os.makedirs("screenshots")
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now().strftime("%Y%m%d_H%M%S")
             filename = f"screenshots/peano_{timestamp}.png"
 
             self.root.update()
@@ -751,13 +780,8 @@ class MovingBallApp:
         )
         return int(size)
 
-    def update_ball(self):
-        self.canvas.delete("all")
-
-        canvas_height = self.get_canvas_height()
-        center_y = canvas_height // 2
-        size = self.get_ball_size()
-
+    def _create_ball_shape(self, center_y, size):
+        """Создание формы шара"""
         x1 = self.x_pos - size
         y1 = center_y - size
         x2 = self.x_pos + size
@@ -767,6 +791,8 @@ class MovingBallApp:
             x1, y1, x2, y2, fill=self.ball_color.get(), outline="black", width=2
         )
 
+    def _create_highlight(self, center_y, size):
+        """Создание блика на шаре"""
         highlight_size = size // 3
         self.highlight = self.canvas.create_oval(
             self.x_pos - highlight_size,
@@ -777,6 +803,16 @@ class MovingBallApp:
             outline="",
         )
 
+    def update_ball(self):
+        self.canvas.delete("all")
+
+        canvas_height = self.get_canvas_height()
+        center_y = canvas_height // 2
+        size = self.get_ball_size()
+
+        self._create_ball_shape(center_y, size)
+        self._create_highlight(center_y, size)
+
         direction_text = "→ приближается" if self.direction == 1 else "← удаляется"
         info = (
             f"Позиция: {self.x_pos}px\nРазмер: {size}px\n"
@@ -784,23 +820,25 @@ class MovingBallApp:
         )
         self.info_label.config(text=info)
 
+    def _check_boundaries(self, canvas_width):
+        """Проверка границ движения"""
+        min_x = 100
+        max_x = canvas_width - 100
+
+        if self.x_pos >= max_x:
+            self.x_pos = max_x
+            self.direction = -1
+            self.status_label.config(text="● Удаляется", fg="orange")
+        elif self.x_pos <= min_x:
+            self.x_pos = min_x
+            self.direction = 1
+            self.status_label.config(text="● Приближается", fg="green")
+
     def animate(self):
         if self.is_moving:
             self.x_pos += self.speed.get() * self.direction
-
             canvas_width = self.get_canvas_width()
-            min_x = 100
-            max_x = canvas_width - 100
-
-            if self.x_pos >= max_x:
-                self.x_pos = max_x
-                self.direction = -1
-                self.status_label.config(text="● Удаляется", fg="orange")
-            elif self.x_pos <= min_x:
-                self.x_pos = min_x
-                self.direction = 1
-                self.status_label.config(text="● Приближается", fg="green")
-
+            self._check_boundaries(canvas_width)
             self.update_ball()
 
         self.animation_id = self.root.after(20, self.animate)
