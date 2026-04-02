@@ -56,21 +56,19 @@ def repeat_with_debug(input_pattern, repeat_count):
     if repeat_count < 0:
         raise ValueError("repeat count must be non-negative")
 
-    print("Pattern: '{}' (length: {})".format(input_pattern, len(input_pattern)))
-    print("Repetitions: {}".format(repeat_count))
+    print(f"Pattern: '{input_pattern}' (length: {len(input_pattern)})")
+    print(f"Repetitions: {repeat_count}")
 
     final_result = input_pattern * repeat_count
 
-    print("Result: '{}'".format(final_result))
-    print("Result length: {}".format(len(final_result)))
+    print(f"Result: '{final_result}'")
+    print(f"Result length: {len(final_result)}")
 
     # Show character by character breakdown
     print("Character breakdown:")
     for position, current_char in enumerate(final_result):
         ascii_val = ord(current_char) if ord(current_char) < 128 else "unicode"
-        print(
-            "  Position {}: '{}' (ASCII: {})".format(position, current_char, ascii_val)
-        )
+        print(f"  Position {position}: '{current_char}' (ASCII: {ascii_val})")
 
     return final_result
 
@@ -81,9 +79,9 @@ if __name__ == "__main__":
 
     # Test examples from specification
     print("\n1. Testing specification examples:")
-    print('  repeat("e", 0) = "{}"'.format(repeat("e", 0)))
-    print('  repeat("e", 3) = "{}"'.format(repeat("e", 3)))
-    print('  repeat(" ABC ", 2) = "{}"'.format(repeat(" ABC ", 2)))
+    print(f'  repeat("e", 0) = "{repeat("e", 0)}"')
+    print(f'  repeat("e", 3) = "{repeat("e", 3)}"')
+    print(f'  repeat(" ABC ", 2) = "{repeat(" ABC ", 2)}"')
 
     # Test with debug to understand the issue
     print("\n2. Debug mode for ' ABC ' pattern:")
@@ -97,20 +95,20 @@ if __name__ == "__main__":
     try:
         repeat("e", -2)
     except ValueError as err:
-        print('  repeat("e", -2) -> ValueError: {}'.format(err))
+        print(f'  repeat("e", -2) -> ValueError: {err}')
 
     try:
         repeat(None, 1)
     except TypeError as err:
-        print("  repeat(None, 1) -> TypeError: {}".format(err))
+        print(f"  repeat(None, 1) -> TypeError: {err}")
 
     print("\n5. Understanding the result:")
     test_pattern = " ABC "
     test_result = repeat(test_pattern, 2)
-    print('  Pattern: "{}"'.format(test_pattern))
-    print('  Result: "{}"'.format(test_result))
+    print(f'  Pattern: "{test_pattern}"')
+    print(f'  Result: "{test_result}"')
     print('  Expected: " ABC  ABC "')
-    print("  Are they equal? {}".format(test_result == " ABC  ABC "))
+    print(f"  Are they equal? {test_result == ' ABC  ABC '}")
     print("  Result characters:")
     for idx, ch in enumerate(test_result):
-        print('    {}: "{}"'.format(idx, ch))
+        print(f'    {idx}: "{ch}"')
