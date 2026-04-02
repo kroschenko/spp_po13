@@ -114,10 +114,10 @@ class PeanoFractalApp:
         self.root.geometry("1200x800")
 
         # Инициализация переменных
-        self._init_variables()
+        self._init_variables()  # pylint: disable=attribute-defined-outside-init
 
         # Инициализация атрибутов виджетов
-        self._init_widget_attributes()
+        self._init_widget_attributes()  # pylint: disable=attribute-defined-outside-init
 
         self.curve = PeanoCurve()
 
