@@ -4,7 +4,6 @@ from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
 import models
-import schemas
 from database import get_db
 
 app = FastAPI(title="Rental Service", version="0.1.0")
