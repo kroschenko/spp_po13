@@ -1,9 +1,10 @@
+import enum
+from datetime import datetime
+from urllib.parse import quote_plus
+
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text, Enum, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from datetime import datetime
-from urllib.parse import quote_plus
-import enum
 
 Base = declarative_base()
 
@@ -116,7 +117,7 @@ class Incident(Base):
 
 # Database connection
 DB_USER = "postgres"
-DB_PASSWORD = ""  # оставь пустым если нет пароля, или укажи пароль
+DB_PASSWORD = ""
 DB_HOST = "localhost"
 DB_PORT = "5432"
 DB_NAME = "sysadmin_db"
