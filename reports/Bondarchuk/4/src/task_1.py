@@ -119,16 +119,15 @@ if __name__ == "__main__":
               f"{contrib['open_issues'] + contrib['closed_issues']} issues, "
               f"рейтинг: {contrib['total_score']}")
 
-    usernames = [c["username"] for c in contributors_list]
-    commits = [c["commits"] for c in contributors_list]
-    prs_total = [c["open_prs"] + c["closed_prs"] for c in contributors_list]
-    issues_total = [c["open_issues"] + c["closed_issues"] for c in contributors_list]
-    total_scores = [c["total_score"] for c in contributors_list]
+    usernames = [c["username"] for c in contributors_data]
+    commits = [c["commits"] for c in contributors_data]
+    prs_total = [c["open_prs"] + c["closed_prs"] for c in contributors_data]
+    issues_total = [c["open_issues"] + c["closed_issues"] for c in contributors_data]
+    total_scores = [c["total_score"] for c in contributors_data]
 
     _, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10))
     y_pos = np.arange(len(usernames))
 
-    # График 1 - Коммиты
     ax1.barh(y_pos, commits, color='skyblue')
     ax1.set_yticks(y_pos)
     ax1.set_yticklabels(usernames)
@@ -138,7 +137,6 @@ if __name__ == "__main__":
     for idx, v in enumerate(commits):
         ax1.text(v + 0.5, idx, str(v), va='center')
 
-    # График 2 - Pull Requests
     ax2.barh(y_pos, prs_total, color='lightgreen')
     ax2.set_yticks(y_pos)
     ax2.set_yticklabels(usernames)
@@ -148,7 +146,6 @@ if __name__ == "__main__":
     for idx, v in enumerate(prs_total):
         ax2.text(v + 0.5, idx, str(v), va='center')
 
-    # График 3 - Issues
     ax3.barh(y_pos, issues_total, color='lightcoral')
     ax3.set_yticks(y_pos)
     ax3.set_yticklabels(usernames)
@@ -158,7 +155,6 @@ if __name__ == "__main__":
     for idx, v in enumerate(issues_total):
         ax3.text(v + 0.5, idx, str(v), va='center')
 
-    # График 4 - Общий рейтинг
     ax4.barh(y_pos, total_scores, color='gold')
     ax4.set_yticks(y_pos)
     ax4.set_yticklabels(usernames)
@@ -169,5 +165,6 @@ if __name__ == "__main__":
         ax4.text(v + 0.5, idx, str(v), va='center')
 
     plt.suptitle(f'Анализ активности контрибьюторов в {repository}', fontsize=16, fontweight='bold')
-    plt.savefig(f"{repository.replace('/', '_')}_contributors.png", dpi=100, bbox_inches='tight')
+    plt.savefig("Out.png", dpi=100, bbox_inches='tight')
+    plt.tight_layout()
     plt.show()
