@@ -1,10 +1,11 @@
+from datetime import date as dt_date
+
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+
 from database import SessionLocal, engine, Base
 import crud
-from datetime import date
-from pydantic import BaseModel
-from datetime import date as dt_date
 
 # Создание всех таблиц
 Base.metadata.create_all(bind=engine)
@@ -30,7 +31,7 @@ class GroupModel(BaseModel):
 class StudentModel(BaseModel):
     first_name: str
     last_name: str
-    birth_date: date
+    birth_date: dt_date
     group_id: int
 
 class SubjectModel(BaseModel):
@@ -89,14 +90,12 @@ def read_students(db: Session = Depends(get_db)):
 
 @app.put("/students/{student_id}")
 def update_student(student_id: int, student: StudentModel, db: Session = Depends(get_db)):
-    return crud.update_student(
-        db,
-        student_id,
-        student.first_name,
-        student.last_name,
-        student.birth_date,
-        student.group_id
-    )
+    return crud.update_student(db, student_id, {
+        "first_name": "John",
+        "last_name": "Doe",
+        "birth_date": dt_date(2000,1,1),
+        "group_id": 1
+    })
 
 @app.delete("/students/{student_id}")
 def delete_student(student_id: int, db: Session = Depends(get_db)):

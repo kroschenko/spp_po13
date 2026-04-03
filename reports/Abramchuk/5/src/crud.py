@@ -1,6 +1,6 @@
+from datetime import date
 from sqlalchemy.orm import Session
 from models import Faculty, Group, Student, Subject, Grade
-from datetime import date
 
 # Faculty
 def add_faculty(db: Session, name: str):
@@ -58,12 +58,10 @@ def add_student(db: Session, first_name: str, last_name: str, birth_date: date, 
 def get_students(db: Session):
     return db.query(Student).all()
 
-def update_student(db: Session, student_id: int, first_name: str, last_name: str, birth_date: date, group_id: int):
+def update_student(db: Session, student_id: int, student_data: dict):
     student = db.get(Student, student_id)
-    student.first_name = first_name
-    student.last_name = last_name
-    student.birth_date = birth_date
-    student.group_id = group_id
+    for key, value in student_data.items():
+        setattr(student, key, value)
     db.commit()
     return student
 
