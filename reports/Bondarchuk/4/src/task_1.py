@@ -117,7 +117,9 @@ if __name__ == "__main__":
         print(f"{i}. {contrib['username']} - {contrib['commits']} комитов, "
               f"{contrib['open_prs'] + contrib['closed_prs']} PR, "
               f"{contrib['open_issues'] + contrib['closed_issues']} issues, "
-              f"рейтинг: {contrib['total_score']}")
+              f"рейтинг: {contrib['total_score']}, "
+              f"последние действия: {contrib['last_activity']}"
+              )
 
     usernames = [c["username"] for c in contributors_data]
     commits = [c["commits"] for c in contributors_data]
