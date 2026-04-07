@@ -1,0 +1,178 @@
+import pytest
+from shopping import Cart, log_purchase, apply_coupon
+
+
+@pytest.fixture
+def empty_cart():
+    return Cart()
+
+
+def test_add_item(empty_cart):
+    empty_cart.add_item("Apple", 10.0)
+
+    assert len(empty_cart.items) == 1
+    assert empty_cart.items[0]["name"] == "Apple"
+    assert empty_cart.items[0]["price"] == 10.0
+
+
+def test_add_item_negative_price(empty_cart):
+    with pytest.raises(ValueError, match="Price cannot be negative"):
+        empty_cart.add_item("Apple", -10.0)
+
+
+def test_total(empty_cart):
+    empty_cart.add_item("Apple", 10.0)
+    empty_cart.add_item("Banana", 5.0)
+
+    assert empty_cart.total() == 15.0
+
+
+@pytest.mark.parametrize(
+    "discount, expected_total",
+    [
+        (0, 100.0),
+        (50, 50.0),
+        (100, 0.0),
+    ],
+)
+def test_apply_discount_valid(empty_cart, discount, expected_total):
+    empty_cart.add_item("Item", 100.0)
+    empty_cart.apply_discount(discount)
+
+    assert empty_cart.total() == expected_total
+
+
+@pytest.mark.parametrize("discount", [-1, 101])
+def test_apply_discount_invalid(empty_cart, discount):
+    with pytest.raises(ValueError, match="Discount must be between 0 and 100"):
+        empty_cart.apply_discount(discount)
+
+
+from unittest.mock import patch
+import pytest
+from shopping import Cart, log_purchase, apply_coupon
+
+
+@pytest.fixture
+def empty_cart():
+    return Cart()
+
+
+def test_add_item(empty_cart):
+    empty_cart.add_item("Apple", 10.0)
+
+    assert len(empty_cart.items) == 1
+    assert empty_cart.items[0]["name"] == "Apple"
+    assert empty_cart.items[0]["price"] == 10.0
+
+
+def test_add_item_negative_price(empty_cart):
+    with pytest.raises(ValueError, match="Price cannot be negative"):
+        empty_cart.add_item("Apple", -10.0)
+
+
+def test_total(empty_cart):
+    empty_cart.add_item("Apple", 10.0)
+    empty_cart.add_item("Banana", 5.0)
+
+    assert empty_cart.total() == 15.0
+
+
+@pytest.mark.parametrize(
+    "discount, expected_total",
+    [
+        (0, 100.0),
+        (50, 50.0),
+        (100, 0.0),
+    ],
+)
+def test_apply_discount_valid(empty_cart, discount, expected_total):
+    empty_cart.add_item("Item", 100.0)
+    empty_cart.apply_discount(discount)
+
+    assert empty_cart.total() == expected_total
+
+
+@pytest.mark.parametrize("discount", [-1, 101])
+def test_apply_discount_invalid(empty_cart, discount):
+    with pytest.raises(ValueError, match="Discount must be between 0 and 100"):
+        empty_cart.apply_discount(discount)
+
+
+def test_log_purchase_calls_requests_post():
+    item = {"name": "Apple", "price": 10.0}
+
+    with patch("shopping.requests.post") as mocked_post:
+        log_purchase(item)
+        mocked_post.assert_called_once_with(
+            "https://example.com/log",
+            json=item,
+        )
+
+
+def test_apply_coupon_save10(empty_cart):
+    empty_cart.add_item("Item", 100.0)
+
+    apply_coupon(empty_cart, "SAVE10")
+
+    assert empty_cart.total() == 90.0
+
+
+def test_apply_coupon_half(empty_cart):
+    empty_cart.add_item("Item", 100.0)
+
+    apply_coupon(empty_cart, "HALF")
+
+    assert empty_cart.total() == 50.0
+
+
+def test_apply_coupon_invalid(empty_cart):
+    empty_cart.add_item("Item", 100.0)
+
+    with pytest.raises(ValueError, match="Invalid coupon"):
+        apply_coupon(empty_cart, "WRONG")
+
+
+def test_apply_coupon_with_monkeypatch(empty_cart, monkeypatch):
+    from shopping import COUPONS
+
+    empty_cart.add_item("Item", 200.0)
+    monkeypatch.setitem(COUPONS, "SUPER", 25)
+
+    apply_coupon(empty_cart, "SUPER")
+
+    assert empty_cart.total() == 150.0
+
+
+def test_apply_coupon_save10(empty_cart):
+    empty_cart.add_item("Item", 100.0)
+
+    apply_coupon(empty_cart, "SAVE10")
+
+    assert empty_cart.total() == 90.0
+
+
+def test_apply_coupon_half(empty_cart):
+    empty_cart.add_item("Item", 100.0)
+
+    apply_coupon(empty_cart, "HALF")
+
+    assert empty_cart.total() == 50.0
+
+
+def test_apply_coupon_invalid(empty_cart):
+    empty_cart.add_item("Item", 100.0)
+
+    with pytest.raises(ValueError, match="Invalid coupon"):
+        apply_coupon(empty_cart, "WRONG")
+
+
+def test_apply_coupon_with_monkeypatch(empty_cart, monkeypatch):
+    from shopping import COUPONS
+
+    empty_cart.add_item("Item", 200.0)
+    monkeypatch.setitem(COUPONS, "SUPER", 25)
+
+    apply_coupon(empty_cart, "SUPER")
+
+    assert empty_cart.total() == 150.0
