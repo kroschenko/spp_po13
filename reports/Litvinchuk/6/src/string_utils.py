@@ -1,4 +1,8 @@
+"""Utility functions for string processing."""
+
+
 def keep(string, pattern):
+    """Keep characters from string that are present in pattern, preserving spaces."""
     if string is None and pattern is None:
         raise TypeError("Both arguments are None")
 
@@ -13,8 +17,8 @@ def keep(string, pattern):
 
     result = ""
 
-    for ch in string:
-        if ch in pattern or ch == " ":
-            result += ch
+    for char in string:
+        if char in pattern or char == " ":
+            result += char
 
     return result
