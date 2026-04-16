@@ -13,6 +13,12 @@ from schemas import (
 )
 import crud
 
+app = FastAPI(title="System Administrator API", version="1.0.0")
+
+@app.on_event("startup")
+async def startup_event():
+    init_db()
+
 
 # ADMIN ENDPOINTS
 
