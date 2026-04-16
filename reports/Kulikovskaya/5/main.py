@@ -1,4 +1,3 @@
-from contextlib import asynccontextmanager
 from typing import List, Optional
 
 from fastapi import FastAPI, Depends, HTTPException
@@ -13,19 +12,6 @@ from schemas import (
     IncidentCreate, IncidentUpdate, IncidentResponse
 )
 import crud
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    init_db()
-    yield
-
-
-app = FastAPI(
-    title="System Administrator API",
-    version="1.0.0",
-    lifespan=lifespan
-)
 
 
 # ADMIN ENDPOINTS
