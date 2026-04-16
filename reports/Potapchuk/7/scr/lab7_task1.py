@@ -10,7 +10,6 @@ class MovingString:
         self.canvas = canvas
         self.width = width
         self.height = height
-        # Случайная скорость и направление
         self.vx = random.choice([-3, -2, 2, 3])
         self.vy = random.choice([-3, -2, 2, 3])
         self.id = self.canvas.create_text(
@@ -25,8 +24,6 @@ class MovingString:
         """Метод для перемещения строки с проверкой границ."""
         self.canvas.move(self.id, self.vx * speed_mult, self.vy * speed_mult)
         pos = self.canvas.coords(self.id)
-
-        # Отскок от левой/правой и верхней/нижней границ
         if pos[0] <= 10 or pos[0] >= self.width - 10:
             self.vx *= -1
         if pos[1] <= 10 or pos[1] >= self.height - 10:
@@ -36,26 +33,20 @@ class MovingString:
 class StringApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Лабораторная 7 - Задание 1")
+        self.root.title("Задание 1")
         self.running = True
-
         self.ctrl = tk.Frame(root)
         self.ctrl.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-
         tk.Button(self.ctrl, text="Пауза/Старт", command=self.toggle).pack(side=tk.LEFT)
         tk.Button(self.ctrl, text="Скриншот", command=self.take_shot).pack(side=tk.LEFT, padx=5)
-
         tk.Label(self.ctrl, text=" Скорость:").pack(side=tk.LEFT)
         self.speed_val = tk.Scale(self.ctrl, from_=1, to=10, orient=tk.HORIZONTAL)
         self.speed_val.set(2)
         self.speed_val.pack(side=tk.LEFT)
-
         self.canvas = tk.Canvas(root, width=600, height=400, bg="white", bd=2, relief="ridge")
         self.canvas.pack(padx=10, pady=10)
-
-        data = ["Программирование", "Python 3.9", "БрГТУ", "Анита", "Visual Studio Code"]
+        data = ["Программирование", "Python", "БрГТУ", "СПП", "Вариант 8"]
         self.lines = [MovingString(self.canvas, txt, 600, 400) for txt in data]
-
         self.animate()
 
     def toggle(self):
@@ -70,7 +61,6 @@ class StringApp:
         y = self.root.winfo_rooty()
         w = self.root.winfo_width()
         h = self.root.winfo_height()
-        
         path = os.path.join(os.getcwd(), "screenshot_task1.png")
         ImageGrab.grab(bbox=(x, y, x + w, y + h)).save(path)
         print(f"Сохранено: {path}")
