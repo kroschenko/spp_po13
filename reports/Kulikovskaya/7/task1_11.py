@@ -5,7 +5,7 @@ import math
 
 class RectangleParams:
     # Параметры прямоугольника для вращения
-    def __init__(self, cx, cy, width, height, angle_deg):
+    def __init__(self, *, cx, cy, width, height, angle_deg):
         self.cx = cx
         self.cy = cy
         self.width = width

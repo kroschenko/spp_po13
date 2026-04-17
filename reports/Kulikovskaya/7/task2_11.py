@@ -138,7 +138,7 @@ class JuliaSetApp:
             self.c_real_var.set(c_r)
             self.c_imag_var.set(c_i)
 
-    def julia(self, z_real, z_imag, c_real, c_imag, max_iter):
+    def julia(self, z_real, z_imag, *, c_real, c_imag, max_iter):
         # Вычисление итераций
         for i in range(max_iter):
             z_real_sq = z_real * z_real
@@ -212,7 +212,7 @@ class JuliaSetApp:
             for px in range(self.width):
                 x = x_min + (x_max - x_min) * px / self.width
 
-                iteration = self.julia(x, y, c_real, c_imag, max_iter)
+                iteration = self.julia(x, y, c_real=c_real, c_imag=c_imag, max_iter=max_iter)
                 color = self.get_color(iteration, max_iter)
 
                 try:
