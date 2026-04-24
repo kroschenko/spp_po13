@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """Lab 2, task 2, variant 7.
 
 Bus depot system model.
@@ -68,6 +69,7 @@ class Vehicle(ABC):
         return isinstance(other, self.__class__) and self.vehicle_id == other.vehicle_id
 
 
+# pylint: disable=too-few-public-methods
 class Car(Vehicle):
     """Concrete vehicle used for trips."""
 
@@ -84,6 +86,7 @@ class WorkerAction(ABC):
         """Perform and describe an action."""
 
 
+# pylint: disable=too-few-public-methods
 @dataclass
 class TripRequest:
     """Represent a request for a trip."""
@@ -93,6 +96,7 @@ class TripRequest:
     assigned: bool = False
 
 
+# pylint: disable=too-few-public-methods
 @dataclass
 class RepairRequest:
     """Represent a driver's repair request."""
@@ -307,5 +311,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
- 
- 
