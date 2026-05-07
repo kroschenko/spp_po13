@@ -1,7 +1,8 @@
-﻿import requests
+﻿from datetime import datetime, timedelta
+
 import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
 import numpy as np
+import requests
 
 # Внешние зависимости: pip install requests matplotlib numpy
 
@@ -44,15 +45,15 @@ def main():
 
     plt.figure(figsize=(10, 6))
     colors = plt.cm.viridis(np.linspace(0.2, 0.9, len(names)))
-    bars = plt.barh(names, stars, color=colors)
+    graph_bars = plt.barh(names, stars, color=colors)
     plt.xlabel("Количество звёзд")
     plt.title(f"ТОП-5 популярных репозиториев на {language} за {period} дней")
     plt.gca().invert_yaxis()
 
-    for bar, star in zip(bars, stars):
+    for graph_bar, star in zip(graph_bars, stars):
         plt.text(
-            bar.get_width() + max(stars) * 0.01,
-            bar.get_y() + bar.get_height() / 2,
+            graph_bar.get_width() + max(stars) * 0.01,
+            graph_bar.get_y() + graph_bar.get_height() / 2,
             f"{star:,}",
             va="center",
             fontsize=10,
