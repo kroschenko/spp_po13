@@ -195,8 +195,6 @@ def main() -> None:
 
     except (ValueError, KeyboardInterrupt, EOFError) as e:
         print(f"Ошибка ввода: {e}")
-    except Exception as e:
-        print(f"Непредвиденная ошибка: {e}")
 
 
 if __name__ == "__main__":
