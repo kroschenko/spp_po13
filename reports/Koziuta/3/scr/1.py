@@ -4,20 +4,20 @@ from abc import ABC, abstractmethod
 class Product(ABC):
     @abstractmethod
     def get_name(self) -> str:
-        pass
-    
+        ...
+
     @abstractmethod
     def get_price(self) -> float:
-        pass
+        ...
 
 class ChocolateBar(Product):
     def __init__(self, name: str, price: float):
         self._name = name
         self._price = price
-    
+
     def get_name(self) -> str:
         return f"Шоколадный батончик '{self._name}'"
-    
+
     def get_price(self) -> float:
         return self._price
 
@@ -25,10 +25,10 @@ class Chips(Product):
     def __init__(self, flavor: str, price: float):
         self._flavor = flavor
         self._price = price
-    
+
     def get_name(self) -> str:
         return f"Чипсы со вкусом '{self._flavor}'"
-    
+
     def get_price(self) -> float:
         return self._price
 
@@ -37,10 +37,10 @@ class Juice(Product):
         self._fruit = fruit
         self._volume = volume_ml
         self._price = price
-    
+
     def get_name(self) -> str:
         return f"Сок '{self._fruit}' {self._volume} мл"
-    
+
     def get_price(self) -> float:
         return self._price
 
@@ -49,8 +49,8 @@ class VendingMachine(ABC):
     @abstractmethod
     def create_product(self, product_type: str, **kwargs) -> Product:
         """Фабричный метод для создания товара"""
-        pass
-    
+        ...
+
     def dispense_product(self, product_type: str, **kwargs) -> None:
         """Метод для выдачи товара"""
         product = self.create_product(product_type, **kwargs)
@@ -61,12 +61,11 @@ class SnackVendingMachine(VendingMachine):
     def create_product(self, product_type: str, **kwargs) -> Product:
         if product_type == "chocolate":
             return ChocolateBar(kwargs.get("name", "Unknown"), kwargs.get("price", 0.0))
-        elif product_type == "chips":
+        if product_type == "chips":
             return Chips(kwargs.get("flavor", "Unknown"), kwargs.get("price", 0.0))
-        elif product_type == "juice":
+        if product_type == "juice":
             return Juice(kwargs.get("fruit", "Unknown"), kwargs.get("volume", 0), kwargs.get("price", 0.0))
-        else:
-            raise ValueError(f"Неизвестный тип товара: {product_type}")
+        raise ValueError(f"Неизвестный тип товара: {product_type}")
 
 # ---------- Пример использования ----------
 if __name__ == "__main__":
