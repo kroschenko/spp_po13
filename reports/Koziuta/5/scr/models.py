@@ -1,6 +1,5 @@
 """SQLAlchemy ORM models."""
 
-from datetime import date
 from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -60,7 +59,7 @@ class Rental(Base):
     staff_id = Column(Integer, ForeignKey("staff.id"))
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
-    status = Column(String, default="active")  # active, completed, cancelled
+    status = Column(String, default="active")
 
     item = relationship("Item", back_populates="rentals")
     customer = relationship("Customer", back_populates="rentals")
