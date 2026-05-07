@@ -1,18 +1,16 @@
-﻿from sqlalchemy import (
-    create_engine,
-    Column,
-    Integer,
-    String,
-    Date,
-    ForeignKey,
-    CheckConstraint,
-)
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+﻿# Стандартные импорты должны быть первыми
 from datetime import date
 
-# Строка подключения к LocalDB
-DATABASE_URL = "mssql+pyodbc://@(localdb)\\MSSQLLocalDB/DeaneryDB?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+# Затем сторонние библиотеки
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
+
+# Строка подключения к LocalDB (разбил на две строки, чтобы не превышать 120 символов)
+DATABASE_URL = (
+    "mssql+pyodbc://@(localdb)\\MSSQLLocalDB/DeaneryDB?"
+    "driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+)
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
