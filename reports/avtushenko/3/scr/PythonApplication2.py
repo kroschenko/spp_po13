@@ -74,8 +74,8 @@ class CoffeeMachine:
 
     def show_menu(self):
         print("=== МЕНЮ ===")
-        for drink_key in self._recipes:
-            drink = self._recipes[drink_key]()
+        for drink_name, drink_class in self._recipes.items():
+            drink = drink_class()
             print(f"  {drink}")
         print("============")
 
