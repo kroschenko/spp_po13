@@ -1,7 +1,6 @@
 ﻿from abc import ABC, abstractmethod
 
 
-# Абстрактный класс напитка
 class Coffee(ABC):
     @abstractmethod
     def get_description(self):
@@ -15,7 +14,6 @@ class Coffee(ABC):
         return f"{self.get_description()}: {self.get_cost()} руб."
 
 
-# Конкретные напитки
 class Espresso(Coffee):
     def get_description(self):
         return "Эспрессо"
@@ -56,7 +54,6 @@ class Mocha(Coffee):
         return 180
 
 
-# Фабрика (Кофе-автомат)
 class CoffeeMachine:
     def __init__(self):
         self._recipes = {
@@ -67,33 +64,32 @@ class CoffeeMachine:
             "мокко": Mocha,
         }
 
-    def make_coffee(self, name: str) -> Coffee:
-        name = name.lower()
-        if name not in self._recipes:
+    def make_coffee(self, drink_name: str) -> Coffee:
+        drink_name = drink_name.lower()
+        if drink_name not in self._recipes:
             raise ValueError(
-                f"Напиток '{name}' не найден. Доступны: {', '.join(self._recipes.keys())}"
+                f"Напиток '{drink_name}' не найден. Доступны: {', '.join(self._recipes.keys())}"
             )
-        return self._recipes[name]()
+        return self._recipes[drink_name]()
 
     def show_menu(self):
         print("=== МЕНЮ ===")
-        for name, coffee_class in self._recipes.items():
-            coffee = coffee_class()
-            print(f"  {coffee}")
+        for drink_key in self._recipes:
+            drink = self._recipes[drink_key]()
+            print(f"  {drink}")
         print("============")
 
 
-# Демонстрация
 if __name__ == "__main__":
     machine = CoffeeMachine()
     machine.show_menu()
 
     print("\nЗаказы:")
-    for drink in ["эспрессо", "капучино", "латте", "мокко"]:
-        coffee = machine.make_coffee(drink)
-        print(f"  Приготовлен: {coffee}")
+    order_list = ["эспрессо", "капучино", "латте", "мокко"]
+    for order_drink in order_list:
+        prepared_drink = machine.make_coffee(order_drink)
+        print(f"  Приготовлен: {prepared_drink}")
 
-    # Попытка заказать несуществующий напиток
     try:
         machine.make_coffee("чай")
     except ValueError as e:
