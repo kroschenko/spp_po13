@@ -10,7 +10,7 @@ import sys
 import json
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Tuple, Any
 
 import requests
 import matplotlib.pyplot as plt
@@ -83,7 +83,7 @@ def extract_commit_info(
     commit = commit_data.get("commit", {})
     author_info = commit.get("author", {})
     date_str = author_info.get("date")
-    message = commit.get("message", "").split("\n")[0]  # first line only
+    message = commit.get("message", "").split("\n")[0]
     author_login = None
     if commit_data.get("author") and commit_data["author"].get("login"):
         author_login = commit_data["author"]["login"]
@@ -117,16 +117,14 @@ def analyze_activity(commits_details: List[Dict[str, Any]]) -> Tuple[int, Dict[s
         if item["date"]:
             try:
                 dt = datetime.fromisoformat(item["date"].replace("Z", "+00:00"))
-                month_name = dt.strftime("%B")  # e.g., "October"
+                month_name = dt.strftime("%B")
                 month_counts[month_name] += 1
             except ValueError:
                 pass
         repo_counts[item["repo"]] += 1
 
     total = len(commits_details)
-    # sort months by count (descending)
     sorted_months = dict(sorted(month_counts.items(), key=lambda x: x[1], reverse=True))
-    # top 3 repos
     top_repos = sorted(repo_counts.items(), key=lambda x: x[1], reverse=True)[:3]
 
     return total, sorted_months, top_repos
@@ -159,6 +157,38 @@ def save_json(data: Dict[str, Any], output_file: str = "github_activity.json") -
     print(f"Data saved to {output_file}")
 
 
+def fetch_commits_details(repos: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    For each repo, get last 10 commits and extract details.
+    Returns list of commit info dictionaries.
+    """
+    all_commits_details = []
+    for repo in repos:
+        repo_name = repo["name"]
+        full_name = repo["full_name"]
+        owner_login = repo["owner"]["login"]
+        print(f"  Processing {full_name}...")
+        commits = get_all_commits(full_name)
+        if not commits:
+            continue
+        last_10 = commits[:10]
+        for commit in last_10:
+            info = extract_commit_info(commit, repo_name, owner_login)
+            all_commits_details.append(info)
+    return all_commits_details
+
+
+def print_results(total_commits: int, month_counts: Dict[str, int], top_repos: List[Tuple[str, int]]) -> None:
+    """Display analysis results on screen."""
+    print(f"\nОбщее количество коммитов: {total_commits}")
+    if month_counts:
+        top_month = next(iter(month_counts.items()))
+        print(f"Самый активный месяц: {top_month[0]} ({top_month[1]} коммитов)")
+    print("ТОП-3 репозитория по количеству коммитов:")
+    for i, (name, count) in enumerate(top_repos, 1):
+        print(f"  {i}. {name} ({count} коммитов)")
+
+
 def main() -> None:
     """Main entry point."""
     username = input("Введите имя пользователя GitHub: ").strip()
@@ -173,50 +203,23 @@ def main() -> None:
         sys.exit(1)
 
     print(f"Found {len(repos)} repositories. Fetching commits (this may take a while)...")
+    commits_details = fetch_commits_details(repos)
 
-    all_commits_details = []
-    repo_commit_counts = {}
-
-    for repo in repos:
-        repo_name = repo["name"]
-        full_name = repo["full_name"]
-        owner_login = repo["owner"]["login"]
-        print(f"  Processing {full_name}...")
-        commits = get_all_commits(full_name)
-        if not commits:
-            continue
-        repo_commit_counts[repo_name] = len(commits)
-
-        # For details we only need last 10 commits (per requirement)
-        last_10 = commits[:10]
-        for commit in last_10:
-            info = extract_commit_info(commit, repo_name, owner_login)
-            all_commits_details.append(info)
-
-    if not all_commits_details:
+    if not commits_details:
         print("No commits found.", file=sys.stderr)
         sys.exit(1)
 
-    total_commits, month_counts, top_repos = analyze_activity(all_commits_details)
+    total_commits, month_counts, top_repos = analyze_activity(commits_details)
 
-    # Prepare output data
     output_data = {
         "username": username,
         "total_commits": total_commits,
         "top_repos": [{"name": name, "commits": count} for name, count in top_repos],
         "monthly_activity": month_counts,
-        "commits_details": all_commits_details,  # last 10 commits per repo
+        "commits_details": commits_details,
     }
 
-    # Display results
-    print(f"\nОбщее количество коммитов: {total_commits}")
-    if month_counts:
-        top_month = next(iter(month_counts.items()))
-        print(f"Самый активный месяц: {top_month[0]} ({top_month[1]} коммитов)")
-    print("ТОП-3 репозитория по количеству коммитов:")
-    for i, (name, count) in enumerate(top_repos, 1):
-        print(f"  {i}. {name} ({count} коммитов)")
-
+    print_results(total_commits, month_counts, top_repos)
     save_json(output_data)
     plot_activity(month_counts)
 
