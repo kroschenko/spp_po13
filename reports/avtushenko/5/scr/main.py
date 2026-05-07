@@ -1,9 +1,14 @@
-﻿from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy.orm import Session
-from typing import List, Optional
+﻿# Стандартные импорты (должны быть первыми)
 from datetime import date
+from typing import List, Optional
+
+# Затем сторонние библиотеки
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from database import SessionLocal, engine, Base, Student, Group, Teacher, Subject, Grade
+
+# Затем локальные импорты (убрал неиспользуемые: engine, Base, Group, Subject)
+from database import SessionLocal, Student, Teacher, Grade
 
 app = FastAPI(title="Деканат API")
 
@@ -82,7 +87,7 @@ def update_student(
     return db_student
 
 
-# Дополнительные эндпойнты для демонстрации
+# Дополнительные эндпойнты
 @app.get("/groups/{group_id}/students")
 def get_students_by_group(group_id: int, db: Session = Depends(get_db)):
     return db.query(Student).filter(Student.group_id == group_id).all()
