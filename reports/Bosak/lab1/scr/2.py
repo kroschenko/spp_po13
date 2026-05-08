@@ -1,17 +1,23 @@
-def is_valid_brackets(s):
-    brackets = {')': '(', '}': '{', ']': '['}
+def is_valid_brackets(bracket_string):
+    brackets = {")": "(", "}": "{", "]": "["}
     stack = []
-    
-    for char in s:
-        if char in '({[':
+
+    for char in bracket_string:
+        if char in "({[":
             stack.append(char)
-        elif char in ')}]':
+        elif char in ")}]":
             if not stack or stack[-1] != brackets[char]:
                 print(False)
                 return
             stack.pop()
-    
+
     print(len(stack) == 0)
 
-s = input()
-is_valid_brackets(s)
+
+def main():
+    bracket_string = input()
+    is_valid_brackets(bracket_string)
+
+
+if __name__ == "__main__":
+    main()
