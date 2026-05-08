@@ -2,24 +2,25 @@ class Rectangle:
     def __init__(self, a, b):
         self.a = a
         self.b = b
-    
+
     def area(self):
         return self.a * self.b
-    
+
     def perimeter(self):
         return 2 * (self.a + self.b)
-    
+
     def is_square(self):
         return self.a == self.b
-    
+
     def exists(self):
         return self.a > 0 and self.b > 0
-    
+
     def __str__(self):
         return f"Rectangle({self.a}, {self.b})"
-    
+
     def __eq__(self, other):
         return self.area() == other.area()
+
 
 print("Введите стороны прямоугольника:")
 a = float(input("Сторона a: "))
