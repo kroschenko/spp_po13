@@ -5,36 +5,38 @@ class Tour:
         self.food = None
         self.excursions = []
         self.price = 0
-    
+
     def __str__(self):
         return f"Тур: {self.transport}, {self.hotel}, питание: {self.food}, экскурсии: {self.excursions}, цена: {self.price}"
+
 
 class TourBuilder:
     def __init__(self):
         self.tour = Tour()
-    
+
     def add_transport(self, transport, cost):
         self.tour.transport = transport
         self.tour.price += cost
         return self
-    
+
     def add_hotel(self, hotel, cost):
         self.tour.hotel = hotel
         self.tour.price += cost
         return self
-    
+
     def add_food(self, food, cost):
         self.tour.food = food
         self.tour.price += cost
         return self
-    
+
     def add_excursion(self, excursion, cost):
         self.tour.excursions.append(excursion)
         self.tour.price += cost
         return self
-    
+
     def build(self):
         return self.tour
+
 
 print("=== Туристическое бюро ===")
 builder = TourBuilder()
