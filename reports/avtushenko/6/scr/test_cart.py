@@ -1,6 +1,6 @@
 ﻿# test_cart.py
-import pytest
 from unittest.mock import patch, Mock
+import pytest
 import requests
 
 
