@@ -32,19 +32,16 @@ class PythagoreanTree:  # pylint: disable=R0902
         if depth > self.max_depth or length < 2:
             return
 
-        # Вычисляем конечную точку ветки с учетом ветра
         rad = math.radians(angle + self.wind * depth * 0.3)
         x2 = x + length * math.cos(rad)
         y2 = y + length * math.sin(rad)
 
-        # Выбор цвета
         color = self._get_color(depth)
 
         line_width = max(2, 12 - depth)
         self.canvas.create_line(x, y, x2, y2, fill=color,
                                 width=line_width, capstyle=tk.ROUND)
 
-        # Углы для левой и правой ветки с учетом ветра
         left_angle = angle - self.left_angle + self.wind * depth * 0.5
         right_angle = angle + self.right_angle + self.wind * depth * 0.5
 
@@ -84,7 +81,6 @@ class TreeApp:  # pylint: disable=R0902
         self.root.geometry("1100x750")
         self.root.configure(bg='#1e1e2e')
 
-        # Параметры по умолчанию
         self.canvas_width = 900
         self.canvas_height = 700
         self.start_x = self.canvas_width // 2
@@ -98,7 +94,6 @@ class TreeApp:  # pylint: disable=R0902
         self.length_ratio = 0.68
         self.color_mode = "gradient"
 
-        # Атрибуты для элементов управления
         self.length_var = None
         self.depth_var = None
         self.left_var = None
@@ -154,13 +149,11 @@ class TreeApp:  # pylint: disable=R0902
         )
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        # Рисуем землю
         self.canvas.create_rectangle(0, self.canvas_height - 25,
                                       self.canvas_width, self.canvas_height,
                                       fill="#5D3A1A", outline="")
 
-     # pylint: disable=R0915
-    def _create_controls(self):  # pylint: disable=R0914,R0915
+    def _create_controls(self):
         """Создание панели управления."""
         control_frame = tk.Frame(self.root, width=270, bg='#2e2e3e')
         control_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=10)
