@@ -98,7 +98,7 @@ class TreeApp:  # pylint: disable=R0902
         self.length_ratio = 0.68
         self.color_mode = "gradient"
 
-        # Атрибуты для элементов управления (инициализация в __init__)
+        # Атрибуты для элементов управления
         self.length_var = None
         self.depth_var = None
         self.left_var = None
@@ -363,8 +363,8 @@ class TreeApp:  # pylint: disable=R0902
         """Анимация ветра."""
         if not self.wind_animation:
             return
-        t = time.time() * 1.5
-        wind_value = int(math.sin(t) * 20)
+        t_val = time.time() * 1.5
+        wind_value = int(math.sin(t_val) * 20)
         self.wind_var.set(wind_value)
         self.change_wind(wind_value)
         self.root.after(80, self.animate_wind)
