@@ -7,10 +7,11 @@ import os
 from datetime import datetime
 
 
-class PythagoreanTree:
+class PythagoreanTree:  # pylint: disable=R0902
     """Класс для генерации дерева Пифагора с эффектом ветра."""
 
-    def __init__(self, canvas, x, y, length, angle, wind=0):
+    def __init__(self, canvas, x, y, length, angle, wind=0):  # pylint: disable=R0913,R0917
+        """Инициализация дерева."""
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -23,7 +24,8 @@ class PythagoreanTree:
         self.length_ratio = 0.68
         self.color_mode = "gradient"
 
-    def draw(self, x, y, length, angle, depth):
+    def draw(self, x, y, length, angle, depth):  # pylint: disable=R0913,R0917
+        """Рекурсивное рисование дерева."""
         if depth > self.max_depth or length < 2:
             return
         rad = math.radians(angle + self.wind * depth * 0.3)
@@ -40,6 +42,7 @@ class PythagoreanTree:
         self.draw(x2, y2, new_len, right, depth + 1)
 
     def _get_color(self, depth):
+        """Получение цвета ветки."""
         if self.color_mode == "gradient":
             if depth < 4:
                 return "#5D3A1A"
@@ -55,14 +58,16 @@ class PythagoreanTree:
         return "#8B4513" if depth < 4 else "#228B22"
 
     def redraw(self):
+        """Перерисовка дерева."""
         self.canvas.delete("all")
         self.draw(self.x, self.y, self.length, self.angle, 0)
 
 
-class TreeApp:
+class TreeApp:  # pylint: disable=R0902
     """Главное приложение."""
 
     def __init__(self, app_root):
+        """Инициализация приложения."""
         self.root = app_root
         self.root.title("Склоненное дерево Пифагора - Обдуваемое ветром")
         self.root.geometry("1100x750")
@@ -108,6 +113,7 @@ class TreeApp:
         self.wind_animation = False
 
     def _create_menu(self):
+        """Создание меню."""
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
         file_menu = tk.Menu(menubar, tearoff=0)
@@ -121,6 +127,7 @@ class TreeApp:
         self.root.bind('<Control-q>', lambda e: self.root.quit())
 
     def _create_canvas(self):
+        """Создание области для рисования."""
         canvas_frame = tk.Frame(self.root, bg='#1e1e2e')
         canvas_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         self.canvas = tk.Canvas(canvas_frame, width=self.canvas_width,
@@ -132,10 +139,11 @@ class TreeApp:
                                       fill="#5D3A1A", outline="")
 
     def _create_controls(self):
+        """Создание панели управления."""
         ctrl = tk.Frame(self.root, width=270, bg='#2e2e3e')
         ctrl.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=10)
         ctrl.pack_propagate(False)
-        tk.Label(ctrl, text="🌳 Параметры дерева", font=('Arial', 15, 'bold'),
+        tk.Label(ctrl, text=" Параметры дерева", font=('Arial', 15, 'bold'),
                  bg='#2e2e3e', fg='white').pack(pady=10)
         self._add_length(ctrl)
         self._add_depth(ctrl)
@@ -150,63 +158,70 @@ class TreeApp:
         self.root.bind('<space>', lambda e: self.toggle_animation())
 
     def _add_length(self, parent):
+        """Добавление контроля длины."""
         f = tk.Frame(parent, bg='#2e2e3e')
         f.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(f, text="📏 Длина ствола:", bg='#2e2e3e', fg='white').pack(anchor='w')
+        tk.Label(f, text=" Длина ствола:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.length_var = tk.IntVar(value=self.length)
         tk.Scale(f, from_=60, to=160, orient=tk.HORIZONTAL, variable=self.length_var,
                  command=self._change_length, bg='#2e2e3e', fg='white',
                  highlightthickness=0).pack(fill=tk.X)
 
     def _add_depth(self, parent):
+        """Добавление контроля глубины."""
         f = tk.Frame(parent, bg='#2e2e3e')
         f.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(f, text="🔢 Глубина рекурсии:", bg='#2e2e3e', fg='white').pack(anchor='w')
+        tk.Label(f, text=" Глубина рекурсии:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.depth_var = tk.IntVar(value=self.max_depth)
         tk.Scale(f, from_=5, to=15, orient=tk.HORIZONTAL, variable=self.depth_var,
                  command=self._change_depth, bg='#2e2e3e', fg='white',
                  highlightthickness=0).pack(fill=tk.X)
 
     def _add_left(self, parent):
+        """Добавление контроля левого угла."""
         f = tk.Frame(parent, bg='#2e2e3e')
         f.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(f, text="⬅️ Угол левой ветки:", bg='#2e2e3e', fg='white').pack(anchor='w')
+        tk.Label(f, text=" Угол левой ветки:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.left_var = tk.IntVar(value=self.left_angle)
         tk.Scale(f, from_=20, to=70, orient=tk.HORIZONTAL, variable=self.left_var,
                  command=self._change_left, bg='#2e2e3e', fg='white',
                  highlightthickness=0).pack(fill=tk.X)
 
     def _add_right(self, parent):
+        """Добавление контроля правого угла."""
         f = tk.Frame(parent, bg='#2e2e3e')
         f.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(f, text="➡️ Угол правой ветки:", bg='#2e2e3e', fg='white').pack(anchor='w')
+        tk.Label(f, text=" Угол правой ветки:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.right_var = tk.IntVar(value=self.right_angle)
         tk.Scale(f, from_=20, to=70, orient=tk.HORIZONTAL, variable=self.right_var,
                  command=self._change_right, bg='#2e2e3e', fg='white',
                  highlightthickness=0).pack(fill=tk.X)
 
     def _add_ratio(self, parent):
+        """Добавление контроля коэффициента."""
         f = tk.Frame(parent, bg='#2e2e3e')
         f.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(f, text="📉 Коэф. уменьшения:", bg='#2e2e3e', fg='white').pack(anchor='w')
+        tk.Label(f, text=" Коэф. уменьшения:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.ratio_var = tk.DoubleVar(value=self.length_ratio)
         tk.Scale(f, from_=0.55, to=0.8, resolution=0.01, orient=tk.HORIZONTAL,
                  variable=self.ratio_var, command=self._change_ratio, bg='#2e2e3e',
                  fg='white', highlightthickness=0).pack(fill=tk.X)
 
     def _add_wind(self, parent):
+        """Добавление контроля ветра."""
         f = tk.Frame(parent, bg='#2e2e3e')
         f.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(f, text="🌬️ Сила ветра:", bg='#2e2e3e', fg='white').pack(anchor='w')
+        tk.Label(f, text=" Сила ветра:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.wind_var = tk.IntVar(value=self.wind)
         tk.Scale(f, from_=-25, to=25, orient=tk.HORIZONTAL, variable=self.wind_var,
                  command=self._change_wind, bg='#2e2e3e', fg='white',
                  highlightthickness=0).pack(fill=tk.X)
 
     def _add_color(self, parent):
+        """Добавление выбора цвета."""
         f = tk.Frame(parent, bg='#2e2e3e')
         f.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(f, text="🎨 Режим цвета:", bg='#2e2e3e', fg='white').pack(anchor='w')
+        tk.Label(f, text=" Режим цвета:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.color_mode_var = tk.StringVar(value=self.color_mode)
         cm = ttk.Combobox(f, textvariable=self.color_mode_var,
                           values=["gradient", "rainbow"], state="readonly")
@@ -214,68 +229,79 @@ class TreeApp:
         cm.bind('<<ComboboxSelected>>', self._change_color)
 
     def _add_buttons(self, parent):
+        """Добавление кнопок."""
         bf = tk.Frame(parent, bg='#2e2e3e')
         bf.pack(pady=10)
         self.animate_btn = tk.Button(bf, text="🎐 Анимация ветра", command=self.toggle_animation,
                                      bg='#444', fg='white', width=18)
         self.animate_btn.pack(pady=3)
-        tk.Button(bf, text="🔄 Сброс параметров", command=self.reset_params,
+        tk.Button(bf, text=" Сброс параметров", command=self.reset_params,
                   bg='#444', fg='white', width=18).pack(pady=3)
-        tk.Button(bf, text="📸 Скриншот", command=self.take_screenshot,
+        tk.Button(bf, text=" Скриншот", command=self.take_screenshot,
                   bg='#444', fg='white', width=18).pack(pady=3)
 
     def _add_info(self, parent):
+        """Добавление информационной метки."""
         self.info_label = tk.Label(parent, text="", bg='#2e2e3e', fg='white',
                                    justify=tk.LEFT, font=('Courier', 9))
         self.info_label.pack(pady=10)
 
     def _add_tips(self, parent):
-        tip = "💡 Подсказки:\n• Ctrl+S - Скриншот\n• Ctrl+Q - Выход"
+        """Добавление подсказок."""
+        tip = " Подсказки:\n• Ctrl+S - Скриншот\n• Ctrl+Q - Выход"
         tk.Label(parent, text=tip, bg='#2e2e3e', fg='#aaa',
                  font=('Arial', 9), justify=tk.LEFT).pack(side=tk.BOTTOM, pady=20)
 
     def _change_length(self, v):
+        """Обработчик изменения длины."""
         self.length = int(v)
         self.tree.length = self.length
         self.tree.redraw()
         self._update_info()
 
     def _change_depth(self, v):
+        """Обработчик изменения глубины."""
         self.max_depth = int(v)
         self.tree.max_depth = self.max_depth
         self.tree.redraw()
         self._update_info()
 
     def _change_left(self, v):
+        """Обработчик изменения левого угла."""
         self.left_angle = int(v)
         self.tree.left_angle = self.left_angle
         self.tree.redraw()
         self._update_info()
 
     def _change_right(self, v):
+        """Обработчик изменения правого угла."""
         self.right_angle = int(v)
         self.tree.right_angle = self.right_angle
         self.tree.redraw()
         self._update_info()
 
     def _change_ratio(self, v):
+        """Обработчик изменения коэффициента."""
         self.length_ratio = float(v)
         self.tree.length_ratio = self.length_ratio
         self.tree.redraw()
         self._update_info()
 
     def _change_wind(self, v):
+        """Обработчик изменения ветра."""
         self.wind = int(v)
         self.tree.wind = self.wind
         self.tree.redraw()
         self._update_info()
 
-    def _change_color(self, event=None):
+    def _change_color(self, event=None):  # pylint: disable=W0613
+        """Обработчик изменения цвета."""
         self.color_mode = self.color_mode_var.get()
         self.tree.color_mode = self.color_mode
         self.tree.redraw()
 
     def toggle_animation(self):
+        """Включение/выключение анимации ветра."""
         self.wind_animation = not self.wind_animation
         txt = "⏸ Остановить ветер" if self.wind_animation else "🎐 Анимация ветра"
         self.animate_btn.config(text=txt)
@@ -283,6 +309,7 @@ class TreeApp:
             self._animate_wind()
 
     def _animate_wind(self):
+        """Анимация ветра."""
         if not self.wind_animation:
             return
         wv = int(math.sin(time.time() * 1.5) * 20)
@@ -291,6 +318,7 @@ class TreeApp:
         self.root.after(80, self._animate_wind)
 
     def reset_params(self):
+        """Сброс параметров."""
         self.length = 100
         self.max_depth = 11
         self.left_angle = 45
@@ -316,6 +344,7 @@ class TreeApp:
         self._update_info()
 
     def take_screenshot(self):
+        """Создание скриншота."""
         os.makedirs("screenshots", exist_ok=True)
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         fn = f"screenshots/tree_{ts}.eps"
@@ -323,9 +352,10 @@ class TreeApp:
         print(f"Скриншот сохранен: {fn}")
 
     def _update_info(self):
-        txt = (f"📏 Длина: {self.length}\n🔢 Глубина: {self.max_depth}\n"
-               f"⬅️ Левый угол: {self.left_angle}°\n➡️ Правый угол: {self.right_angle}°\n"
-               f"📉 Коэф. уменьшения: {self.length_ratio:.2f}\n🌬️ Ветер: {self.wind}")
+        """Обновление информации."""
+        txt = (f" Длина: {self.length}\n Глубина: {self.max_depth}\n"
+               f"⬅ Левый угол: {self.left_angle}°\n Правый угол: {self.right_angle}°\n"
+               f" Коэф. уменьшения: {self.length_ratio:.2f}\n Ветер: {self.wind}")
         self.info_label.config(text=txt)
 
 
