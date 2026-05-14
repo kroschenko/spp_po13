@@ -69,18 +69,6 @@ class TreeApp:  # pylint: disable=R0902
     def __init__(self, app_root):
         """Инициализация приложения."""
         self.root = app_root
-        self._setup_window()
-        self._setup_defaults()
-        self._create_components()
-
-    def _setup_window(self):
-        """Настройка окна."""
-        self.root.title("Склоненное дерево Пифагора - Обдуваемое ветром")
-        self.root.geometry("1100x750")
-        self.root.configure(bg="#1e1e2e")
-
-    def _setup_defaults(self):
-        """Настройка параметров по умолчанию."""
         self.canvas_width = 900
         self.canvas_height = 700
         self.start_x = self.canvas_width // 2
@@ -93,6 +81,9 @@ class TreeApp:  # pylint: disable=R0902
         self.right_angle = 45
         self.length_ratio = 0.68
         self.color_mode = "gradient"
+        self.canvas = None
+        self.tree = None
+        self.wind_animation = False
         self.length_var = None
         self.depth_var = None
         self.left_var = None
@@ -102,6 +93,14 @@ class TreeApp:  # pylint: disable=R0902
         self.color_mode_var = None
         self.animate_btn = None
         self.info_label = None
+        self._setup_window()
+        self._create_components()
+
+    def _setup_window(self):
+        """Настройка окна.""" 
+        self.root.title("Склоненное дерево Пифагора - Обдуваемое ветром")
+        self.root.geometry("1100x750")
+        self.root.configure(bg="#1e1e2e")
 
     def _create_components(self):
         """Создание компонентов."""
@@ -116,7 +115,6 @@ class TreeApp:  # pylint: disable=R0902
         self.tree.length_ratio = self.length_ratio
         self.tree.color_mode = self.color_mode
         self.tree.redraw()
-        self.wind_animation = False
 
     def _create_menu(self):
         """Создание меню."""
@@ -310,56 +308,64 @@ class TreeApp:  # pylint: disable=R0902
     def _change_length(self, v):
         """Обработчик изменения длины."""
         self.length = int(v)
-        self.tree.length = self.length
-        self.tree.redraw()
+        if self.tree:
+            self.tree.length = self.length
+            self.tree.redraw()
         self._update_info()
 
     def _change_depth(self, v):
         """Обработчик изменения глубины."""
         self.max_depth = int(v)
-        self.tree.max_depth = self.max_depth
-        self.tree.redraw()
+        if self.tree:
+            self.tree.max_depth = self.max_depth
+            self.tree.redraw()
         self._update_info()
 
     def _change_left(self, v):
         """Обработчик изменения левого угла."""
         self.left_angle = int(v)
-        self.tree.left_angle = self.left_angle
-        self.tree.redraw()
+        if self.tree:
+            self.tree.left_angle = self.left_angle
+            self.tree.redraw()
         self._update_info()
 
     def _change_right(self, v):
         """Обработчик изменения правого угла."""
         self.right_angle = int(v)
-        self.tree.right_angle = self.right_angle
-        self.tree.redraw()
+        if self.tree:
+            self.tree.right_angle = self.right_angle
+            self.tree.redraw()
         self._update_info()
 
     def _change_ratio(self, v):
         """Обработчик изменения коэффициента."""
         self.length_ratio = float(v)
-        self.tree.length_ratio = self.length_ratio
-        self.tree.redraw()
+        if self.tree:
+            self.tree.length_ratio = self.length_ratio
+            self.tree.redraw()
         self._update_info()
 
     def _change_wind(self, v):
         """Обработчик изменения ветра."""
         self.wind = int(v)
-        self.tree.wind = self.wind
-        self.tree.redraw()
+        if self.tree:
+            self.tree.wind = self.wind
+            self.tree.redraw()
         self._update_info()
 
     def _change_color(self, event=None):  # pylint: disable=W0613
         """Обработчик изменения цвета."""
         self.color_mode = self.color_mode_var.get()
-        self.tree.color_mode = self.color_mode
-        self.tree.redraw()
+        if self.tree:
+            self.tree.color_mode = self.color_mode
+            self.tree.redraw()
 
     def toggle_animation(self):
         """Включение/выключение анимации ветра."""
         self.wind_animation = not self.wind_animation
         txt = "⏸ Остановить ветер" if self.wind_animation else "🎐 Анимация ветра"
-        self.animate_btn.config(text=txt)
+        if self.animate_btn:
+            self.animate_btn.config(text=txt)
         if self.wind_animation:
             self._animate_wind()
 
@@ -368,7 +374,8 @@ class TreeApp:  # pylint: disable=R0902
         if not self.wind_animation:
             return
         wv = int(math.sin(time.time() * 1.5) * 20)
-        self.wind_var.set(wv)
+        if self.wind_var:
+            self.wind_var.set(wv)
         self._change_wind(wv)
         self.root.after(80, self._animate_wind)
 
@@ -381,21 +388,31 @@ class TreeApp:  # pylint: disable=R0902
         self.length_ratio = 0.68
         self.wind = 0
         self.color_mode = "gradient"
-        self.length_var.set(100)
-        self.depth_var.set(11)
-        self.left_var.set(45)
-        self.right_var.set(45)
-        self.ratio_var.set(0.68)
-        self.wind_var.set(0)
-        self.color_mode_var.set("gradient")
-        self.tree.length = 100
-        self.tree.max_depth = 11
-        self.tree.left_angle = 45
-        self.tree.right_angle = 45
-        self.tree.length_ratio = 0.68
-        self.tree.wind = 0
-        self.tree.color_mode = "gradient"
-        self.tree.redraw()
+
+        if self.length_var:
+            self.length_var.set(100)
+        if self.depth_var:
+            self.depth_var.set(11)
+        if self.left_var:
+            self.left_var.set(45)
+        if self.right_var:
+            self.right_var.set(45)
+        if self.ratio_var:
+            self.ratio_var.set(0.68)
+        if self.wind_var:
+            self.wind_var.set(0)
+        if self.color_mode_var:
+            self.color_mode_var.set("gradient")
+
+        if self.tree:
+            self.tree.length = 100
+            self.tree.max_depth = 11
+            self.tree.left_angle = 45
+            self.tree.right_angle = 45
+            self.tree.length_ratio = 0.68
+            self.tree.wind = 0
+            self.tree.color_mode = "gradient"
+            self.tree.redraw()
         self._update_info()
 
     def take_screenshot(self):
@@ -403,7 +420,8 @@ class TreeApp:  # pylint: disable=R0902
         os.makedirs("screenshots", exist_ok=True)
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         fn = f"screenshots/tree_{ts}.eps"
-        self.canvas.postscript(file=fn, colormode="color")
+        if self.canvas:
+            self.canvas.postscript(file=fn, colormode="color")
         print(f"Скриншот сохранен: {fn}")
 
     def _update_info(self):
@@ -413,7 +431,8 @@ class TreeApp:  # pylint: disable=R0902
             f"⬅ Левый угол: {self.left_angle}°\n Правый угол: {self.right_angle}°\n"
             f" Коэф. уменьшения: {self.length_ratio:.2f}\n Ветер: {self.wind}"
         )
-        self.info_label.config(text=txt)
+        if self.info_label:
+            self.info_label.config(text=txt)
 
 
 if __name__ == "__main__":
