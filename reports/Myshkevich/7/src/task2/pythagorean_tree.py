@@ -155,198 +155,149 @@ class TreeApp:  # pylint: disable=R0902
 
     def _create_controls(self):
         """Создание панели управления."""
-        control_frame = tk.Frame(self.root, width=270, bg='#2e2e3e')
-        control_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=10)
-        control_frame.pack_propagate(False)
+        ctrl = tk.Frame(self.root, width=270, bg='#2e2e3e')
+        ctrl.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=10)
+        ctrl.pack_propagate(False)
 
-        tk.Label(control_frame, text="🌳 Параметры дерева",
+        tk.Label(ctrl, text="🌳 Параметры дерева",
                  font=('Arial', 15, 'bold'), bg='#2e2e3e',
                  fg='white').pack(pady=10)
 
-        self._add_length_control(control_frame)
-        self._add_depth_control(control_frame)
-        self._add_left_angle_control(control_frame)
-        self._add_right_angle_control(control_frame)
-        self._add_ratio_control(control_frame)
-        self._add_wind_control(control_frame)
-        self._add_color_control(control_frame)
-        self._add_buttons(control_frame)
-        self._add_info_label(control_frame)
-        self._add_tips(control_frame)
+        self._add_length_control(ctrl)
+        self._add_depth_control(ctrl)
+        self._add_left_angle_control(ctrl)
+        self._add_right_angle_control(ctrl)
+        self._add_ratio_control(ctrl)
+        self._add_wind_control(ctrl)
+        self._add_color_control(ctrl)
+        self._add_buttons(ctrl)
+        self._add_info_label(ctrl)
+        self._add_tips(ctrl)
 
         self.root.bind('<space>', lambda e: self.toggle_animation())
 
     def _add_length_control(self, parent):
-        """Добавление контроля длины ствола."""
         frame = tk.Frame(parent, bg='#2e2e3e')
         frame.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(frame, text="📏 Длина ствола:", bg='#2e2e3e',
-                 fg='white').pack(anchor='w')
+        tk.Label(frame, text="📏 Длина ствола:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.length_var = tk.IntVar(value=self.length)
-        scale = tk.Scale(frame, from_=60, to=160, orient=tk.HORIZONTAL,
-                         variable=self.length_var, command=self.change_length,
-                         bg='#2e2e3e', fg='white', highlightthickness=0)
-        scale.pack(fill=tk.X)
+        tk.Scale(frame, from_=60, to=160, orient=tk.HORIZONTAL, variable=self.length_var,
+                 command=self.change_length, bg='#2e2e3e', fg='white', highlightthickness=0).pack(fill=tk.X)
 
     def _add_depth_control(self, parent):
-        """Добавление контроля глубины рекурсии."""
         frame = tk.Frame(parent, bg='#2e2e3e')
         frame.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(frame, text="🔢 Глубина рекурсии:", bg='#2e2e3e',
-                 fg='white').pack(anchor='w')
+        tk.Label(frame, text="🔢 Глубина рекурсии:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.depth_var = tk.IntVar(value=self.max_depth)
-        scale = tk.Scale(frame, from_=5, to=15, orient=tk.HORIZONTAL,
-                         variable=self.depth_var, command=self.change_depth,
-                         bg='#2e2e3e', fg='white', highlightthickness=0)
-        scale.pack(fill=tk.X)
+        tk.Scale(frame, from_=5, to=15, orient=tk.HORIZONTAL, variable=self.depth_var,
+                 command=self.change_depth, bg='#2e2e3e', fg='white', highlightthickness=0).pack(fill=tk.X)
 
     def _add_left_angle_control(self, parent):
-        """Добавление контроля левого угла."""
         frame = tk.Frame(parent, bg='#2e2e3e')
         frame.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(frame, text="⬅️ Угол левой ветки:", bg='#2e2e3e',
-                 fg='white').pack(anchor='w')
+        tk.Label(frame, text="⬅️ Угол левой ветки:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.left_var = tk.IntVar(value=self.left_angle)
-        scale = tk.Scale(frame, from_=20, to=70, orient=tk.HORIZONTAL,
-                         variable=self.left_var, command=self.change_left_angle,
-                         bg='#2e2e3e', fg='white', highlightthickness=0)
-        scale.pack(fill=tk.X)
+        tk.Scale(frame, from_=20, to=70, orient=tk.HORIZONTAL, variable=self.left_var,
+                 command=self.change_left_angle, bg='#2e2e3e', fg='white', highlightthickness=0).pack(fill=tk.X)
 
     def _add_right_angle_control(self, parent):
-        """Добавление контроля правого угла."""
         frame = tk.Frame(parent, bg='#2e2e3e')
         frame.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(frame, text="➡️ Угол правой ветки:", bg='#2e2e3e',
-                 fg='white').pack(anchor='w')
+        tk.Label(frame, text="➡️ Угол правой ветки:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.right_var = tk.IntVar(value=self.right_angle)
-        scale = tk.Scale(frame, from_=20, to=70, orient=tk.HORIZONTAL,
-                         variable=self.right_var, command=self.change_right_angle,
-                         bg='#2e2e3e', fg='white', highlightthickness=0)
-        scale.pack(fill=tk.X)
+        tk.Scale(frame, from_=20, to=70, orient=tk.HORIZONTAL, variable=self.right_var,
+                 command=self.change_right_angle, bg='#2e2e3e', fg='white', highlightthickness=0).pack(fill=tk.X)
 
     def _add_ratio_control(self, parent):
-        """Добавление контроля коэффициента уменьшения."""
         frame = tk.Frame(parent, bg='#2e2e3e')
         frame.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(frame, text="📉 Коэф. уменьшения:", bg='#2e2e3e',
-                 fg='white').pack(anchor='w')
+        tk.Label(frame, text="📉 Коэф. уменьшения:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.ratio_var = tk.DoubleVar(value=self.length_ratio)
-        scale = tk.Scale(frame, from_=0.55, to=0.8, resolution=0.01,
-                         orient=tk.HORIZONTAL, variable=self.ratio_var,
-                         command=self.change_ratio, bg='#2e2e3e',
-                         fg='white', highlightthickness=0)
-        scale.pack(fill=tk.X)
+        tk.Scale(frame, from_=0.55, to=0.8, resolution=0.01, orient=tk.HORIZONTAL,
+                 variable=self.ratio_var, command=self.change_ratio, bg='#2e2e3e',
+                 fg='white', highlightthickness=0).pack(fill=tk.X)
 
     def _add_wind_control(self, parent):
-        """Добавление контроля силы ветра."""
         frame = tk.Frame(parent, bg='#2e2e3e')
         frame.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(frame, text="🌬️ Сила ветра:", bg='#2e2e3e',
-                 fg='white').pack(anchor='w')
+        tk.Label(frame, text="🌬️ Сила ветра:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.wind_var = tk.IntVar(value=self.wind)
-        scale = tk.Scale(frame, from_=-25, to=25, orient=tk.HORIZONTAL,
-                         variable=self.wind_var, command=self.change_wind,
-                         bg='#2e2e3e', fg='white', highlightthickness=0)
-        scale.pack(fill=tk.X)
+        tk.Scale(frame, from_=-25, to=25, orient=tk.HORIZONTAL, variable=self.wind_var,
+                 command=self.change_wind, bg='#2e2e3e', fg='white', highlightthickness=0).pack(fill=tk.X)
 
     def _add_color_control(self, parent):
-        """Добавление выбора режима цвета."""
         frame = tk.Frame(parent, bg='#2e2e3e')
         frame.pack(fill=tk.X, pady=5, padx=10)
-        tk.Label(frame, text="🎨 Режим цвета:", bg='#2e2e3e',
-                 fg='white').pack(anchor='w')
+        tk.Label(frame, text="🎨 Режим цвета:", bg='#2e2e3e', fg='white').pack(anchor='w')
         self.color_mode_var = tk.StringVar(value=self.color_mode)
         color_menu = ttk.Combobox(frame, textvariable=self.color_mode_var,
-                                  values=["gradient", "rainbow"],
-                                  state="readonly")
+                                  values=["gradient", "rainbow"], state="readonly")
         color_menu.pack(fill=tk.X)
         color_menu.bind('<<ComboboxSelected>>', self.change_color_mode)
 
     def _add_buttons(self, parent):
-        """Добавление кнопок управления."""
         btn_frame = tk.Frame(parent, bg='#2e2e3e')
         btn_frame.pack(pady=10)
-
-        self.animate_btn = tk.Button(btn_frame, text="🎐 Анимация ветра",
-                                     command=self.toggle_animation,
+        self.animate_btn = tk.Button(btn_frame, text="🎐 Анимация ветра", command=self.toggle_animation,
                                      bg='#444', fg='white', width=18)
         self.animate_btn.pack(pady=3)
-
-        reset_btn = tk.Button(btn_frame, text="🔄 Сброс параметров",
-                              command=self.reset_params,
-                              bg='#444', fg='white', width=18)
-        reset_btn.pack(pady=3)
-
-        screenshot_btn = tk.Button(btn_frame, text="📸 Скриншот",
-                                   command=self.take_screenshot,
-                                   bg='#444', fg='white', width=18)
-        screenshot_btn.pack(pady=3)
+        tk.Button(btn_frame, text="🔄 Сброс параметров", command=self.reset_params,
+                  bg='#444', fg='white', width=18).pack(pady=3)
+        tk.Button(btn_frame, text="📸 Скриншот", command=self.take_screenshot,
+                  bg='#444', fg='white', width=18).pack(pady=3)
 
     def _add_info_label(self, parent):
-        """Добавление информационной метки."""
-        self.info_label = tk.Label(parent, text="", bg='#2e2e3e',
-                                   fg='white', justify=tk.LEFT,
-                                   font=('Courier', 9))
+        self.info_label = tk.Label(parent, text="", bg='#2e2e3e', fg='white',
+                                   justify=tk.LEFT, font=('Courier', 9))
         self.info_label.pack(pady=10)
 
     def _add_tips(self, parent):
-        """Добавление подсказок."""
-        tip_text = ("💡 Подсказки:\n• Ctrl+S - Скриншот\n"
-                    "• Ctrl+Q - Выход")
+        tip_text = "💡 Подсказки:\n• Ctrl+S - Скриншот\n• Ctrl+Q - Выход"
         tk.Label(parent, text=tip_text, bg='#2e2e3e', fg='#aaa',
-                 font=('Arial', 9), justify=tk.LEFT).pack(side=tk.BOTTOM,
-                                                           pady=20)
+                 font=('Arial', 9), justify=tk.LEFT).pack(side=tk.BOTTOM, pady=20)
 
     def change_length(self, value):
-        """Изменение длины ствола."""
         self.length = int(value)
         self.tree.length = self.length
         self.tree.redraw()
         self.update_info()
 
     def change_depth(self, value):
-        """Изменение глубины рекурсии."""
         self.max_depth = int(value)
         self.tree.max_depth = self.max_depth
         self.tree.redraw()
         self.update_info()
 
     def change_left_angle(self, value):
-        """Изменение угла левой ветки."""
         self.left_angle = int(value)
         self.tree.left_angle = self.left_angle
         self.tree.redraw()
         self.update_info()
 
     def change_right_angle(self, value):
-        """Изменение угла правой ветки."""
         self.right_angle = int(value)
         self.tree.right_angle = self.right_angle
         self.tree.redraw()
         self.update_info()
 
     def change_ratio(self, value):
-        """Изменение коэффициента уменьшения."""
         self.length_ratio = float(value)
         self.tree.length_ratio = self.length_ratio
         self.tree.redraw()
         self.update_info()
 
     def change_wind(self, value):
-        """Изменение силы ветра."""
         self.wind = int(value)
         self.tree.wind = self.wind
         self.tree.redraw()
         self.update_info()
 
-    def change_color_mode(self, event=None):  # pylint: disable=W0613
-        """Изменение режима цвета."""
+    def change_color_mode(self):
         self.color_mode = self.color_mode_var.get()
         self.tree.color_mode = self.color_mode
         self.tree.redraw()
 
     def toggle_animation(self):
-        """Включение/выключение анимации ветра."""
         self.wind_animation = not self.wind_animation
         text = "⏸ Остановить ветер" if self.wind_animation else "🎐 Анимация ветра"
         self.animate_btn.config(text=text)
@@ -354,17 +305,14 @@ class TreeApp:  # pylint: disable=R0902
             self.animate_wind()
 
     def animate_wind(self):
-        """Анимация ветра."""
         if not self.wind_animation:
             return
-        t_val = time.time() * 1.5
-        wind_value = int(math.sin(t_val) * 20)
+        wind_value = int(math.sin(time.time() * 1.5) * 20)
         self.wind_var.set(wind_value)
         self.change_wind(wind_value)
         self.root.after(80, self.animate_wind)
 
     def reset_params(self):
-        """Сброс параметров."""
         self.length = 100
         self.max_depth = 11
         self.left_angle = 45
@@ -372,7 +320,6 @@ class TreeApp:  # pylint: disable=R0902
         self.length_ratio = 0.68
         self.wind = 0
         self.color_mode = "gradient"
-
         self.length_var.set(100)
         self.depth_var.set(11)
         self.left_var.set(45)
@@ -380,7 +327,6 @@ class TreeApp:  # pylint: disable=R0902
         self.ratio_var.set(0.68)
         self.wind_var.set(0)
         self.color_mode_var.set("gradient")
-
         self.tree.length = 100
         self.tree.max_depth = 11
         self.tree.left_angle = 45
@@ -392,7 +338,6 @@ class TreeApp:  # pylint: disable=R0902
         self.update_info()
 
     def take_screenshot(self):
-        """Создание скриншота."""
         os.makedirs("screenshots", exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"screenshots/tree_{timestamp}.eps"
@@ -400,7 +345,6 @@ class TreeApp:  # pylint: disable=R0902
         print(f"Скриншот сохранен: {filename}")
 
     def update_info(self):
-        """Обновление информационной панели."""
         text = (f"📏 Длина: {self.length}\n🔢 Глубина: {self.max_depth}\n"
                 f"⬅️ Левый угол: {self.left_angle}°\n➡️ Правый угол: {self.right_angle}°\n"
                 f"📉 Коэф. уменьшения: {self.length_ratio:.2f}\n🌬️ Ветер: {self.wind}")
