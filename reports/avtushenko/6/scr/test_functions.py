@@ -67,185 +67,154 @@ def two_sum_test_data():
 class TestCheckEqual:
     """Тесты для функции check_equal"""
 
+    # pylint: disable=too-many-public-methods
+
     # === Тривиальные случаи ===
 
-    @staticmethod
-    def test_all_equal_numbers():
+    def test_all_equal_numbers(self):
         """Все числа равны"""
         assert check_equal([5, 5, 5, 5]) == "равны"
 
-    @staticmethod
-    def test_not_equal_numbers():
+    def test_not_equal_numbers(self):
         """Числа не равны"""
         assert check_equal([1, 2, 3, 4]) == "не равны"
 
-    @staticmethod
-    def test_all_equal_strings():
+    def test_all_equal_strings(self):
         """Все строки равны"""
         assert check_equal(["a", "a", "a"]) == "равны"
 
-    @staticmethod
-    def test_not_equal_strings():
+    def test_not_equal_strings(self):
         """Строки не равны"""
         assert check_equal(["a", "b", "c"]) == "не равны"
 
-    @staticmethod
-    def test_all_equal_floats():
+    def test_all_equal_floats(self):
         """Все float числа равны"""
         assert check_equal([3.14, 3.14, 3.14]) == "равны"
 
-    @staticmethod
-    def test_not_equal_floats():
+    def test_not_equal_floats(self):
         """Float числа не равны"""
         assert check_equal([3.14, 2.71, 1.41]) == "не равны"
 
     # === Граничные случаи ===
 
-    @staticmethod
-    def test_single_element():
+    def test_single_element(self):
         """Последовательность из одного элемента"""
         assert check_equal([42]) == "равны"
 
-    @staticmethod
-    def test_single_element_none():
+    def test_single_element_none(self):
         """Единственный элемент None"""
         assert check_equal([None]) == "равны"
 
-    @staticmethod
-    def test_two_equal_elements():
+    def test_two_equal_elements(self):
         """Два равных элемента"""
         assert check_equal([7, 7]) == "равны"
 
-    @staticmethod
-    def test_two_not_equal_elements():
+    def test_two_not_equal_elements(self):
         """Два разных элемента"""
         assert check_equal([7, 8]) == "не равны"
 
-    @staticmethod
-    def test_first_different():
+    def test_first_different(self):
         """Первый элемент отличается"""
         assert check_equal([1, 2, 2, 2]) == "не равны"
 
-    @staticmethod
-    def test_last_different():
+    def test_last_different(self):
         """Последний элемент отличается"""
         assert check_equal([2, 2, 2, 1]) == "не равны"
 
-    @staticmethod
-    def test_middle_different():
+    def test_middle_different(self):
         """Средний элемент отличается"""
         assert check_equal([2, 2, 1, 2, 2]) == "не равны"
 
-    @staticmethod
-    def test_large_sequence_equal():
+    def test_large_sequence_equal(self):
         """Большая последовательность равных элементов"""
         assert check_equal([1] * 1000) == "равны"
 
-    @staticmethod
-    def test_large_sequence_not_equal():
+    def test_large_sequence_not_equal(self):
         """Большая последовательность с разными элементами"""
         seq = [1] * 999 + [2]
         assert check_equal(seq) == "не равны"
 
     # === Пустая последовательность ===
 
-    @staticmethod
-    def test_empty_list():
+    def test_empty_list(self):
         """Пустой список"""
         assert check_equal([]) == "не равны"
 
-    @staticmethod
-    def test_empty_tuple():
+    def test_empty_tuple(self):
         """Пустой кортеж"""
         assert check_equal(()) == "не равны"
 
-    @staticmethod
-    def test_empty_string():
+    def test_empty_string(self):
         """Пустая строка"""
         assert check_equal("") == "не равны"
 
     # === Специальные типы данных ===
 
-    @staticmethod
-    def test_boolean_values_equal():
+    def test_boolean_values_equal(self):
         """Булевы значения (равны)"""
         assert check_equal([True, True, True]) == "равны"
 
-    @staticmethod
-    def test_boolean_values_not_equal():
+    def test_boolean_values_not_equal(self):
         """Булевы значения (не равны)"""
         assert check_equal([True, False, True]) == "не равны"
 
-    @staticmethod
-    def test_mixed_types():
+    def test_mixed_types(self):
         """Смешанные типы данных"""
         assert check_equal([1, "1", 1.0]) == "не равны"
 
-    @staticmethod
-    def test_none_values_equal():
+    def test_none_values_equal(self):
         """Все None значения"""
         assert check_equal([None, None, None]) == "равны"
 
-    @staticmethod
-    def test_none_and_value():
+    def test_none_and_value(self):
         """None и другие значения"""
         assert check_equal([None, 1]) == "не равны"
 
     # === Нестандартные последовательности ===
 
-    @staticmethod
-    def test_tuple_input():
+    def test_tuple_input(self):
         """Кортеж на входе"""
         assert check_equal((5, 5, 5)) == "равны"
 
-    @staticmethod
-    def test_string_input_equal():
+    def test_string_input_equal(self):
         """Строка с одинаковыми символами"""
         assert check_equal("aaaa") == "равны"
 
-    @staticmethod
-    def test_string_input_not_equal():
+    def test_string_input_not_equal(self):
         """Строка с разными символами"""
         assert check_equal("abcd") == "не равны"
 
-    @staticmethod
-    def test_range_object():
+    def test_range_object(self):
         """Объект range"""
         assert check_equal(range(1, 5)) == "не равны"
 
-    @staticmethod
-    def test_list_of_lists_equal():
+    def test_list_of_lists_equal(self):
         """Список одинаковых списков"""
         assert check_equal([[1, 2], [1, 2], [1, 2]]) == "равны"
 
-    @staticmethod
-    def test_list_of_lists_not_equal():
+    def test_list_of_lists_not_equal(self):
         """Список разных списков"""
         assert check_equal([[1, 2], [3, 4]]) == "не равны"
 
     # === Исключительные ситуации ===
 
-    @staticmethod
-    def test_none_input():
+    def test_none_input(self):
         """None как входной параметр (None считается falsy, возвращает "не равны")"""
         result = check_equal(None)
         assert result == "не равны"
 
-    @staticmethod
-    def test_integer_input():
+    def test_integer_input(self):
         """Целое число вместо последовательности"""
         with pytest.raises(TypeError):
             check_equal(42)
 
-    @staticmethod
-    def test_generator_input():
+    def test_generator_input(self):
         """Генератор (нельзя индексировать)"""
         gen = (x for x in [1, 1, 1])
         with pytest.raises(TypeError):
             check_equal(gen)
 
-    @staticmethod
-    def test_uncomparable_objects():
+    def test_uncomparable_objects(self):
         """Объекты, которые нельзя сравнить"""
 
         class Uncomparable:
@@ -264,61 +233,53 @@ class TestCheckEqual:
 class TestTwoSum:
     """Тесты для функции two_sum"""
 
+    # pylint: disable=too-many-public-methods
+
     # === Тривиальные случаи ===
 
-    @staticmethod
-    def test_simple_case():
+    def test_simple_case(self):
         """Простой случай"""
         assert two_sum([2, 7, 11, 15], 9) == [0, 1]
 
-    @staticmethod
-    def test_same_number_twice():
+    def test_same_number_twice(self):
         """Одно и то же число дважды"""
         assert two_sum([3, 3], 6) == [0, 1]
 
-    @staticmethod
-    def test_negative_numbers():
+    def test_negative_numbers(self):
         """Отрицательные числа"""
         assert two_sum([-3, 4, 3, 90], 0) == [0, 2]
 
-    @staticmethod
-    def test_zero_target():
+    def test_zero_target(self):
         """Нулевая цель"""
         result = two_sum([1, -1, 2, -2], 0)
         assert result is not None
         assert len(result) == 2
         assert result[0] != result[1]
 
-    @staticmethod
-    def test_large_numbers():
+    def test_large_numbers(self):
         """Большие числа"""
         result = two_sum([1000000, 2000000, 3000000], 5000000)
         assert result == [1, 2]
 
     # === Граничные случаи ===
 
-    @staticmethod
-    def test_two_elements_found():
+    def test_two_elements_found(self):
         """Ровно два элемента (решение есть)"""
         assert two_sum([1, 2], 3) == [0, 1]
 
-    @staticmethod
-    def test_two_elements_not_found():
+    def test_two_elements_not_found(self):
         """Ровно два элемента (решения нет)"""
         assert two_sum([1, 2], 4) is None
 
-    @staticmethod
-    def test_solution_at_beginning():
+    def test_solution_at_beginning(self):
         """Решение в начале массива"""
         assert two_sum([1, 2, 3, 4, 5], 3) == [0, 1]
 
-    @staticmethod
-    def test_solution_at_end():
+    def test_solution_at_end(self):
         """Решение в конце массива"""
         assert two_sum([1, 2, 3, 4, 5], 9) == [3, 4]
 
-    @staticmethod
-    def test_solution_far_apart():
+    def test_solution_far_apart(self):
         """Элементы далеко друг от друга (проверяем правильность суммы, а не конкретные индексы)"""
         nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         target = 11
@@ -328,8 +289,7 @@ class TestTwoSum:
         assert result[0] != result[1]
         assert nums[result[0]] + nums[result[1]] == target
 
-    @staticmethod
-    def test_multiple_solutions_returns_first():
+    def test_multiple_solutions_returns_first(self):
         """Несколько решений (возвращает первое найденное)"""
         result = two_sum([1, 2, 3, 1], 4)
         assert result is not None
@@ -337,8 +297,7 @@ class TestTwoSum:
         nums = [1, 2, 3, 1]
         assert nums[result[0]] + nums[result[1]] == 4
 
-    @staticmethod
-    def test_different_indices_required():
+    def test_different_indices_required(self):
         """Нельзя использовать один и тот же индекс дважды"""
         nums = [2, 1, 3]
         target = 4
@@ -349,31 +308,26 @@ class TestTwoSum:
 
     # === Пустые и маленькие последовательности ===
 
-    @staticmethod
-    def test_empty_list():
+    def test_empty_list(self):
         """Пустой список"""
         assert two_sum([], 5) is None
 
-    @staticmethod
-    def test_single_element():
+    def test_single_element(self):
         """Один элемент"""
         assert two_sum([5], 5) is None
 
-    @staticmethod
-    def test_single_element_zero():
+    def test_single_element_zero(self):
         """Один элемент равен цели"""
         assert two_sum([0], 0) is None
 
     # === Нули и специальные значения ===
 
-    @staticmethod
-    def test_all_zeros():
+    def test_all_zeros(self):
         """Все нули"""
         result = two_sum([0, 0, 0], 0)
         assert result == [0, 1]
 
-    @staticmethod
-    def test_target_zero_with_various_numbers():
+    def test_target_zero_with_various_numbers(self):
         """Цель 0 с разными числами (проверяем правильность суммы)"""
         nums = [1, 0, -1, 2]
         target = 0
@@ -382,8 +336,7 @@ class TestTwoSum:
         assert result[0] != result[1]
         assert nums[result[0]] + nums[result[1]] == target
 
-    @staticmethod
-    def test_duplicate_numbers():
+    def test_duplicate_numbers(self):
         """Дубликаты чисел"""
         result = two_sum([1, 2, 2, 3], 4)
         assert result is not None
@@ -391,8 +344,7 @@ class TestTwoSum:
         nums = [1, 2, 2, 3]
         assert nums[result[0]] + nums[result[1]] == 4
 
-    @staticmethod
-    def test_very_large_array():
+    def test_very_large_array(self):
         """Очень большой массив"""
         nums = list(range(10000))
         target = 19997
@@ -402,14 +354,12 @@ class TestTwoSum:
 
     # === Float числа ===
 
-    @staticmethod
-    def test_float_numbers():
+    def test_float_numbers(self):
         """Float числа"""
         result = two_sum([1.5, 2.5, 3.5], 4.0)
         assert result == [0, 1]
 
-    @staticmethod
-    def test_float_precision():
+    def test_float_precision(self):
         """Точность float"""
         result = two_sum([0.1, 0.2, 0.3], 0.5)
         assert result is not None
@@ -418,59 +368,50 @@ class TestTwoSum:
 
     # === Исключительные ситуации ===
 
-    @staticmethod
-    def test_none_input_list():
+    def test_none_input_list(self):
         """None вместо списка"""
         with pytest.raises(TypeError):
             two_sum(None, 5)
 
-    @staticmethod
-    def test_none_target():
+    def test_none_target(self):
         """None вместо цели"""
         with pytest.raises(TypeError):
             two_sum([1, 2, 3], None)
 
-    @staticmethod
-    def test_string_in_list():
+    def test_string_in_list(self):
         """Строка в списке чисел"""
         with pytest.raises(TypeError):
             two_sum([1, "2", 3], 5)
 
-    @staticmethod
-    def test_target_not_number():
+    def test_target_not_number(self):
         """Цель не число"""
         with pytest.raises(TypeError):
             two_sum([1, 2, 3], "5")
 
-    @staticmethod
-    def test_list_with_none():
+    def test_list_with_none(self):
         """None в списке"""
         with pytest.raises(TypeError):
             two_sum([1, None, 3], 4)
 
-    @staticmethod
-    def test_non_list_input():
+    def test_non_list_input(self):
         """Не список на входе"""
         with pytest.raises(TypeError):
             two_sum("123", 5)
 
-    @staticmethod
-    def test_mixed_types_in_list():
+    def test_mixed_types_in_list(self):
         """Смешанные типы в списке"""
         with pytest.raises(TypeError):
             two_sum([1, 2.5, "3"], 5)
 
     # === Дополнительные проверки ===
 
-    @staticmethod
-    def test_result_indices_are_different():
+    def test_result_indices_are_different(self):
         """Проверка, что индексы разные"""
         result = two_sum([1, 2, 3], 5)
         if result:
             assert result[0] != result[1]
 
-    @staticmethod
-    def test_result_is_correct():
+    def test_result_is_correct(self):
         """Проверка правильности результата"""
         nums = [3, 7, 11, 15]
         target = 18
@@ -478,8 +419,7 @@ class TestTwoSum:
         assert result is not None
         assert nums[result[0]] + nums[result[1]] == target
 
-    @staticmethod
-    def test_order_of_indices():
+    def test_order_of_indices(self):
         """Проверка порядка индексов (первый меньше второго)"""
         result = two_sum([5, 3, 8, 2], 10)
         if result:
@@ -507,8 +447,7 @@ class TestParametrized:
             ([42], "равны"),
         ],
     )
-    @staticmethod
-    def test_check_equal_parametrized(sequence, expected):
+    def test_check_equal_parametrized(self, sequence, expected):
         """Параметризованный тест check_equal"""
         assert check_equal(sequence) == expected
 
@@ -524,8 +463,7 @@ class TestParametrized:
             ([-1, -2, -3, -4, -5], -8, [2, 4]),
         ],
     )
-    @staticmethod
-    def test_two_sum_parametrized(nums, target, expected):
+    def test_two_sum_parametrized(self, nums, target, expected):
         """Параметризованный тест two_sum"""
         assert two_sum(nums, target) == expected
 
