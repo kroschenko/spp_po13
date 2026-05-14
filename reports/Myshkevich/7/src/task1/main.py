@@ -152,7 +152,7 @@ class CircleAnimationApp:  # pylint: disable=R0902
         self.canvas.pack(fill=tk.BOTH, expand=True)
         self.canvas.create_rectangle(0, 0, self.width, self.height, outline='white', width=2)
 
-    def _create_controls(self):  # pylint: disable=R0914
+    def _create_controls(self):  # pylint: disable=R0914,R0915
         """Создание панели управления."""
         control_frame = tk.Frame(self.root, width=250, bg='#2e2e3e')
         control_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=10)
@@ -189,7 +189,7 @@ class CircleAnimationApp:  # pylint: disable=R0902
                                 bg='#2e2e3e', fg='white', highlightthickness=0)
         radius_scale.pack(fill=tk.X)
 
-        # Скорость X
+        # Скорость X (макс 50)
         speed_x_frame = tk.Frame(control_frame, bg='#2e2e3e')
         speed_x_frame.pack(fill=tk.X, pady=5, padx=10)
         tk.Label(speed_x_frame, text="Скорость X:", bg='#2e2e3e', fg='white').pack(anchor='w')
@@ -199,7 +199,7 @@ class CircleAnimationApp:  # pylint: disable=R0902
                                  bg='#2e2e3e', fg='white', highlightthickness=0)
         speed_x_scale.pack(fill=tk.X)
 
-        # Скорость Y
+        # Скорость Y (макс 50)
         speed_y_frame = tk.Frame(control_frame, bg='#2e2e3e')
         speed_y_frame.pack(fill=tk.X, pady=5, padx=10)
         tk.Label(speed_y_frame, text="Скорость Y:", bg='#2e2e3e', fg='white').pack(anchor='w')
