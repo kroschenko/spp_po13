@@ -160,7 +160,7 @@ class TreeApp:  # pylint: disable=R0902
                                       fill="#5D3A1A", outline="")
 
      # pylint: disable=R0915
-    def _create_controls(self):  # pylint: disable=R0914
+    def _create_controls(self):  # pylint: disable=R0914,R0915
         """Создание панели управления."""
         control_frame = tk.Frame(self.root, width=270, bg='#2e2e3e')
         control_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=10)
