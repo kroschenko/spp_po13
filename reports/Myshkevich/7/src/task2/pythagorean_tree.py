@@ -290,7 +290,6 @@ class TreeApp:  # pylint: disable=R0902
             bf, text="🎐 Анимация ветра", command=self.toggle_animation, bg="#444", fg="white", width=18
         )
         self.animate_btn.pack(pady=3)
-        tk.Button(bf, text=" Сброс параметров", command=self.reset_params, bg="#444", fg="white", width=18).pack(pady=3)
         tk.Button(bf, text=" Скриншот", command=self.take_screenshot, bg="#444", fg="white", width=18).pack(pady=3)
 
     def _add_info(self, parent):
@@ -300,7 +299,7 @@ class TreeApp:  # pylint: disable=R0902
 
     def _add_tips(self, parent):
         """Добавление подсказок."""
-        tip = " Подсказки:\n• Ctrl+S - Скриншот\n• Ctrl+Q - Выход"
+        tip = " Подсказки:\n• Ctrl+S - Скриншот\n• Ctrl+Q - Выход\n• Пробел - Анимация ветра"
         tk.Label(parent, text=tip, bg="#2e2e3e", fg="#aaa", font=("Arial", 9), justify=tk.LEFT).pack(
             side=tk.BOTTOM, pady=20
         )
@@ -378,42 +377,6 @@ class TreeApp:  # pylint: disable=R0902
             self.wind_var.set(wv)
         self._change_wind(wv)
         self.root.after(80, self._animate_wind)
-
-    def reset_params(self):
-        """Сброс параметров."""
-        self.length = 100
-        self.max_depth = 11
-        self.left_angle = 45
-        self.right_angle = 45
-        self.length_ratio = 0.68
-        self.wind = 0
-        self.color_mode = "gradient"
-
-        if self.length_var:
-            self.length_var.set(100)
-        if self.depth_var:
-            self.depth_var.set(11)
-        if self.left_var:
-            self.left_var.set(45)
-        if self.right_var:
-            self.right_var.set(45)
-        if self.ratio_var:
-            self.ratio_var.set(0.68)
-        if self.wind_var:
-            self.wind_var.set(0)
-        if self.color_mode_var:
-            self.color_mode_var.set("gradient")
-
-        if self.tree:
-            self.tree.length = 100
-            self.tree.max_depth = 11
-            self.tree.left_angle = 45
-            self.tree.right_angle = 45
-            self.tree.length_ratio = 0.68
-            self.tree.wind = 0
-            self.tree.color_mode = "gradient"
-            self.tree.redraw()
-        self._update_info()
 
     def take_screenshot(self):
         """Создание скриншота."""
