@@ -47,10 +47,21 @@ class TriangleApp:
         self.master.title("Треугольник и точки")
         self.master.geometry("900x700")
 
+        # Инициализация всех атрибутов
         self.points = []
         self.triangle = None
         self.speed = tk.DoubleVar(value=1.0)
         self.paused = False
+
+        # Виджеты (будут созданы в _setup_ui)
+        self.t_p1 = None
+        self.t_p2 = None
+        self.t_p3 = None
+        self.points_count = None
+        self.speed_scale = None
+        self.speed_label = None
+        self.stats_label = None
+        self.canvas = None
 
         self._setup_ui()
         self._setup_canvas()
@@ -267,14 +278,14 @@ class TriangleApp:
                 text=f"Скриншот сохранен: {os.path.abspath(filename)}"
             )
 
-        except Exception as e:
+        except (IOError, OSError) as e:
             messagebox.showerror("Ошибка", f"Не удалось создать скриншот: {str(e)}")
 
 
 def main():
     """Главная функция для запуска приложения"""
     root = tk.Tk()
-    app = TriangleApp(root)
+    TriangleApp(root)
     root.mainloop()
 
 
