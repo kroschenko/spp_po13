@@ -1,22 +1,22 @@
-import pygame
-import sys
 from datetime import datetime
+import pygame
+
 
 pygame.init()
 
 WIDTH = 800
 HEIGHT = 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Движение окружности")
 
 
 class Circle:
-    def __init__(self, x, y, r, sx, sy):
-        self.x = x
-        self.y = y
-        self.r = r
-        self.sx = sx
-        self.sy = sy
+    def __init__(self, x_pos, y_pos, radius, speed_x, speed_y):
+        self.x = x_pos
+        self.y = y_pos
+        self.r = radius
+        self.sx = speed_x
+        self.sy = speed_y
 
     def move(self):
         self.x += self.sx
@@ -28,40 +28,40 @@ class Circle:
             self.sy = -self.sy
 
     def draw(self):
-        pygame.draw.circle(screen, (255, 0, 0), (int(self.x), int(self.y)), self.r)
+        pygame.draw.circle(SCREEN, (255, 0, 0), (int(self.x), int(self.y)), self.r)
 
 
-circle = Circle(WIDTH // 2, HEIGHT // 2, 30, 5, 3)
-running = True
-paused = False
-clock = pygame.time.Clock()
+CIRCLE = Circle(WIDTH // 2, HEIGHT // 2, 30, 5, 3)
+RUNNING = True
+PAUSED = False
+CLOCK = pygame.time.Clock()
 
-while running:
+while RUNNING:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            RUNNING = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                paused = not paused
+                PAUSED = not PAUSED
             if event.key == pygame.K_s:
-                name = f"screenshot_{datetime.now().strftime('%H%M%S')}.png"
-                pygame.image.save(screen, name)
-                print(f"Сохранен: {name}")
+                SCREENSHOT_NAME = f"screenshot_{datetime.now().strftime('%H%M%S')}.png"
+                pygame.image.save(SCREEN, SCREENSHOT_NAME)
+                print(f"Сохранен: {SCREENSHOT_NAME}")
 
-    screen.fill((0, 0, 0))
+    SCREEN.fill((0, 0, 0))
 
-    if not paused:
-        circle.move()
+    if not PAUSED:
+        CIRCLE.move()
 
-    circle.draw()
+    CIRCLE.draw()
 
-    font = pygame.font.Font(None, 24)
-    status = "ПАУЗА" if paused else "ДВИЖЕНИЕ"
-    color = (255, 255, 0) if paused else (0, 255, 0)
-    text = font.render(f"{status} | Space - пауза | S - скриншот", True, color)
-    screen.blit(text, (10, HEIGHT - 30))
+    FONT = pygame.font.Font(None, 24)
+    STATUS_TEXT = "ПАУЗА" if PAUSED else "ДВИЖЕНИЕ"
+    TEXT_COLOR = (255, 255, 0) if PAUSED else (0, 255, 0)
+    TEXT_SURFACE = FONT.render(f"{STATUS_TEXT} | Space - пауза | S - скриншот", True, TEXT_COLOR)
+    SCREEN.blit(TEXT_SURFACE, (10, HEIGHT - 30))
 
     pygame.display.flip()
-    clock.tick(60)
+    CLOCK.tick(60)
 
 pygame.quit()

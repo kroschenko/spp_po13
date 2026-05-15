@@ -1,76 +1,75 @@
-import pygame
-import sys
 import math
 from datetime import datetime
+import pygame
+
 
 pygame.init()
 
 WIDTH = 800
 HEIGHT = 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Дерево Пифагора")
-clock = pygame.time.Clock()
+CLOCK = pygame.time.Clock()
 
 
-def draw_tree(x, y, length, angle, depth, wind):
-    if depth == 0 or length < 2:
+def draw_tree(x, y, length, angle, tree_depth, wind_power):
+    if tree_depth == 0 or length < 2:
         return
 
-    wind_effect = wind * depth
+    wind_effect = wind_power * tree_depth
 
     x2 = x + length * math.cos(math.radians(angle + wind_effect))
     y2 = y - length * math.sin(math.radians(angle + wind_effect))
 
-    # Цвет (R, G, B) - от коричневого до зеленого
-    r = min(139, 80 + depth * 10)
-    g = min(69, 40 + depth * 5)
-    b = min(19, 10 + depth)
-    color = (r, g, b)
+    red = min(139, 80 + tree_depth * 10)
+    green = min(69, 40 + tree_depth * 5)
+    blue = min(19, 10 + tree_depth)
+    color = (red, green, blue)
 
-    if depth < 4:
-        color = (34, 139, 34)  # Зеленый
+    if tree_depth < 4:
+        color = (34, 139, 34)
 
-    pygame.draw.line(screen, color, (int(x), int(y)), (int(x2), int(y2)), max(1, depth // 2))
+    pygame.draw.line(SCREEN, color, (int(x), int(y)), (int(x2), int(y2)), max(1, tree_depth // 2))
 
     new_len = length * 0.7
-    draw_tree(x2, y2, new_len, angle - 35 - wind, depth - 1, wind)
-    draw_tree(x2, y2, new_len, angle + 35 - wind, depth - 1, wind)
+    draw_tree(x2, y2, new_len, angle - 35 - wind_power, tree_depth - 1, wind_power)
+    draw_tree(x2, y2, new_len, angle + 35 - wind_power, tree_depth - 1, wind_power)
 
 
-depth = 10
-wind = 0
-running = True
+DEPTH = 10
+WIND = 0
+RUNNING = True
 
-while running:
+while RUNNING:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            RUNNING = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                depth = min(depth + 1, 12)
+                DEPTH = min(DEPTH + 1, 12)
             if event.key == pygame.K_DOWN:
-                depth = max(depth - 1, 1)
+                DEPTH = max(DEPTH - 1, 1)
             if event.key == pygame.K_LEFT:
-                wind -= 3
+                WIND -= 3
             if event.key == pygame.K_RIGHT:
-                wind += 3
+                WIND += 3
             if event.key == pygame.K_SPACE:
-                wind = 0
+                WIND = 0
             if event.key == pygame.K_s:
-                name = f"tree_{datetime.now().strftime('%H%M%S')}.png"
-                pygame.image.save(screen, name)
-                print(f"Сохранен: {name}")
+                SCREENSHOT_NAME = f"tree_{datetime.now().strftime('%H%M%S')}.png"
+                pygame.image.save(SCREEN, SCREENSHOT_NAME)
+                print(f"Сохранен: {SCREENSHOT_NAME}")
 
-    screen.fill((0, 0, 0))
-    draw_tree(WIDTH // 2, HEIGHT - 100, 100, -90, depth, wind)
+    SCREEN.fill((0, 0, 0))
+    draw_tree(WIDTH // 2, HEIGHT - 100, 100, -90, DEPTH, WIND)
 
-    font = pygame.font.Font(None, 24)
-    text1 = font.render(f"Глубина: {depth} (↑↓)", True, (255, 255, 255))
-    text2 = font.render(f"Ветер: {wind} (←→) | Space - сброс | S - скриншот", True, (255, 255, 255))
-    screen.blit(text1, (10, 10))
-    screen.blit(text2, (10, 35))
+    FONT = pygame.font.Font(None, 24)
+    TEXT1 = FONT.render(f"Глубина: {DEPTH} (↑↓)", True, (255, 255, 255))
+    TEXT2 = FONT.render(f"Ветер: {WIND} (←→) | Space - сброс | S - скриншот", True, (255, 255, 255))
+    SCREEN.blit(TEXT1, (10, 10))
+    SCREEN.blit(TEXT2, (10, 35))
 
     pygame.display.flip()
-    clock.tick(60)
+    CLOCK.tick(60)
 
 pygame.quit()
