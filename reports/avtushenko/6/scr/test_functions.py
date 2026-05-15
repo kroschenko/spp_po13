@@ -41,20 +41,20 @@ def two_sum(nums, target):
 # ============================================
 
 
-@pytest.fixture
-def sample_numbers():
+@pytest.fixture(name="sample_numbers")
+def fixture_sample_numbers():
     """Пример числовой последовательности"""
     return [1, 2, 3, 4, 5]
 
 
-@pytest.fixture
-def sample_equal_numbers():
+@pytest.fixture(name="sample_equal_numbers")
+def fixture_sample_equal_numbers():
     """Последовательность равных чисел"""
     return [7, 7, 7, 7]
 
 
-@pytest.fixture
-def two_sum_test_data():
+@pytest.fixture(name="two_sum_test_data")
+def fixture_two_sum_test_data():
     """Тестовые данные для two_sum"""
     return {"nums": [2, 7, 11, 15], "target": 9, "expected": [0, 1]}
 
