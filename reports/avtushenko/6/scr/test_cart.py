@@ -40,14 +40,14 @@ def apply_coupon(cart, coupon_code):
 
 
 # Фикстура для пустой корзины
-@pytest.fixture
-def empty_cart():
+@pytest.fixture(name="empty_cart")
+def fixture_empty_cart():
     return Cart()
 
 
 # Фикстура для корзины с одним товаром
-@pytest.fixture
-def cart_with_apple():
+@pytest.fixture(name="cart_with_apple")
+def fixture_cart_with_apple():
     cart = Cart()
     cart.add_item("Apple", 10.0)
     return cart
