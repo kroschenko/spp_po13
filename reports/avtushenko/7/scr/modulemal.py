@@ -83,6 +83,14 @@ class MandelbrotApp:
         self.drag_start = None
         self.photo = None
 
+        # Инициализация всех атрибутов виджетов
+        self.iter_entry = None
+        self.zoom_label = None
+        self.zoom_factor_label = None
+        self.info_label = None
+        self.stats_label = None
+        self.canvas = None
+
         # Создаем объект фрактала
         self.mandelbrot = MandelbrotSet(self.width, self.height, self.max_iter.get())
 
@@ -419,7 +427,7 @@ class MandelbrotApp:
 def main():
     """Главная функция для запуска приложения"""
     root = tk.Tk()
-    app = MandelbrotApp(root)
+    MandelbrotApp(root)
     root.mainloop()
 
 
