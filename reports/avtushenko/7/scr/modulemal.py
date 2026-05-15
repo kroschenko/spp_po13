@@ -1,10 +1,10 @@
-﻿import tkinter as tk
+﻿import os
+from datetime import datetime
+import colorsys
+import tkinter as tk
 from tkinter import ttk, messagebox
 import numpy as np
 from PIL import Image, ImageTk, ImageGrab
-import os
-from datetime import datetime
-import colorsys
 
 
 class MandelbrotSet:
@@ -41,7 +41,7 @@ class MandelbrotSet:
         # Вычисляем множество Мандельброта
         mask = np.ones(C.shape, dtype=bool)
 
-        for i in range(self.max_iter):
+        for _ in range(self.max_iter):
             Z[mask] = Z[mask] ** 2 + C[mask]
             mask = np.abs(Z) < 2
             iterations += mask
@@ -68,10 +68,10 @@ class MandelbrotSet:
 
 
 class MandelbrotApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Множество Мандельброта")
-        self.root.geometry("1000x800")
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Множество Мандельброта")
+        self.master.geometry("1000x800")
 
         # Параметры фрактала
         self.width = 800
@@ -80,6 +80,8 @@ class MandelbrotApp:
         self.color_scheme = tk.StringVar(value="rainbow")
         self.zoom_factor = tk.DoubleVar(value=2.0)
         self.paused = False
+        self.drag_start = None
+        self.photo = None
 
         # Создаем объект фрактала
         self.mandelbrot = MandelbrotSet(self.width, self.height, self.max_iter.get())
@@ -87,28 +89,47 @@ class MandelbrotApp:
         # Флаг для отмены вычислений
         self.computing = False
 
-        self.setup_ui()
+        self._setup_ui()
 
-    def setup_ui(self):
-        # Главный контейнер
-        main_frame = ttk.Frame(self.root, padding=10)
+    def _setup_ui(self):
+        """Настройка пользовательского интерфейса"""
+        main_frame = ttk.Frame(self.master, padding=10)
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Панель управления
-        control_frame = ttk.LabelFrame(main_frame, text="Управление", padding=10)
+        self._create_control_panel(main_frame)
+        self._create_canvas(main_frame)
+
+        # Генерируем начальный фрактал
+        self.master.after(100, self.redraw)
+
+    def _create_control_panel(self, parent):
+        """Создание панели управления"""
+        control_frame = ttk.LabelFrame(parent, text="Управление", padding=10)
         control_frame.pack(side=tk.TOP, fill=tk.X, pady=(0, 10))
 
-        # Первая строка управления
-        row1 = ttk.Frame(control_frame)
-        row1.pack(fill=tk.X, pady=5)
+        self._create_iteration_controls(control_frame)
+        self._create_color_controls(control_frame)
+        self._create_zoom_controls(control_frame)
+        self._create_action_buttons(control_frame)
+        self._create_info_labels(control_frame)
 
-        ttk.Label(row1, text="Итерации:").pack(side=tk.LEFT, padx=5)
-        self.iter_entry = ttk.Entry(row1, textvariable=self.max_iter, width=10)
+    def _create_iteration_controls(self, frame):
+        """Создание элементов управления итерациями"""
+        row = ttk.Frame(frame)
+        row.pack(fill=tk.X, pady=5)
+
+        ttk.Label(row, text="Итерации:").pack(side=tk.LEFT, padx=5)
+        self.iter_entry = ttk.Entry(row, textvariable=self.max_iter, width=10)
         self.iter_entry.pack(side=tk.LEFT, padx=5)
 
-        ttk.Label(row1, text="Цветовая схема:").pack(side=tk.LEFT, padx=5)
+    def _create_color_controls(self, frame):
+        """Создание элементов управления цветом"""
+        row = ttk.Frame(frame)
+        row.pack(fill=tk.X, pady=5)
+
+        ttk.Label(row, text="Цветовая схема:").pack(side=tk.LEFT, padx=5)
         color_combo = ttk.Combobox(
-            row1,
+            row,
             textvariable=self.color_scheme,
             values=["rainbow", "fire", "ocean", "grayscale", "neon"],
             width=15,
@@ -117,17 +138,18 @@ class MandelbrotApp:
         color_combo.pack(side=tk.LEFT, padx=5)
         color_combo.set("rainbow")
 
-        ttk.Label(row1, text="Масштаб:").pack(side=tk.LEFT, padx=5)
-        self.zoom_label = ttk.Label(row1, text="1.0x")
+        ttk.Label(row, text="Масштаб:").pack(side=tk.LEFT, padx=5)
+        self.zoom_label = ttk.Label(row, text="1.0x")
         self.zoom_label.pack(side=tk.LEFT, padx=5)
 
-        # Вторая строка управления
-        row2 = ttk.Frame(control_frame)
-        row2.pack(fill=tk.X, pady=5)
+    def _create_zoom_controls(self, frame):
+        """Создание элементов управления зумом"""
+        row = ttk.Frame(frame)
+        row.pack(fill=tk.X, pady=5)
 
-        ttk.Label(row2, text="Фактор зума:").pack(side=tk.LEFT, padx=5)
+        ttk.Label(row, text="Фактор зума:").pack(side=tk.LEFT, padx=5)
         zoom_scale = ttk.Scale(
-            row2,
+            row,
             from_=1.5,
             to=10.0,
             variable=self.zoom_factor,
@@ -135,7 +157,7 @@ class MandelbrotApp:
             length=150,
         )
         zoom_scale.pack(side=tk.LEFT, padx=5)
-        self.zoom_factor_label = ttk.Label(row2, text="2.0x")
+        self.zoom_factor_label = ttk.Label(row, text="2.0x")
         self.zoom_factor_label.pack(side=tk.LEFT, padx=5)
         self.zoom_factor.trace_add(
             "write",
@@ -144,90 +166,96 @@ class MandelbrotApp:
             ),
         )
 
-        # Третья строка - кнопки
-        row3 = ttk.Frame(control_frame)
-        row3.pack(fill=tk.X, pady=5)
+    def _create_action_buttons(self, frame):
+        """Создание кнопок действий"""
+        row = ttk.Frame(frame)
+        row.pack(fill=tk.X, pady=5)
 
-        ttk.Button(row3, text="🔄 Перерисовать", command=self.redraw).pack(
+        ttk.Button(row, text="🔄 Перерисовать", command=self.redraw).pack(
             side=tk.LEFT, padx=5
         )
-        ttk.Button(row3, text="⏯ Пауза", command=self.toggle_pause).pack(
+        ttk.Button(row, text="⏯ Пауза", command=self.toggle_pause).pack(
             side=tk.LEFT, padx=5
         )
-        ttk.Button(row3, text="🔍 Сбросить вид", command=self.reset_view).pack(
+        ttk.Button(row, text="🔍 Сбросить вид", command=self.reset_view).pack(
             side=tk.LEFT, padx=5
         )
-        ttk.Button(row3, text="📸 Скриншот", command=self.take_screenshot).pack(
+        ttk.Button(row, text="📸 Скриншот", command=self.take_screenshot).pack(
             side=tk.LEFT, padx=5
         )
-        ttk.Button(row3, text="💾 Сохранить изображение", command=self.save_image).pack(
+        ttk.Button(row, text="💾 Сохранить изображение", command=self.save_image).pack(
             side=tk.LEFT, padx=5
         )
 
-        # Информационная строка
+    def _create_info_labels(self, frame):
+        """Создание информационных меток"""
         self.info_label = ttk.Label(
-            control_frame, text="Готов к работе. Кликните для приближения"
+            frame, text="Готов к работе. Кликните для приближения"
         )
         self.info_label.pack(fill=tk.X, pady=5)
 
-        # Статистика
-        self.stats_label = ttk.Label(control_frame, text="")
+        self.stats_label = ttk.Label(frame, text="")
         self.stats_label.pack(fill=tk.X)
 
-        # Холст для отображения
+    def _create_canvas(self, parent):
+        """Создание холста для отображения"""
         self.canvas = tk.Canvas(
-            main_frame,
-            width=self.width,
-            height=self.height,
-            bg="black",
-            cursor="crosshair",
+            parent, width=self.width, height=self.height, bg="black", cursor="crosshair"
         )
         self.canvas.pack(expand=True)
 
         # Привязка событий мыши
-        self.canvas.bind("<Button-1>", self.on_canvas_click)
-        self.canvas.bind("<B1-Motion>", self.on_canvas_drag)
-        self.canvas.bind("<ButtonRelease-1>", self.on_canvas_release)
+        self.canvas.bind("<Button-1>", self._on_canvas_click)
+        self.canvas.bind("<B1-Motion>", self._on_canvas_drag)
+        self.canvas.bind("<ButtonRelease-1>", self._on_canvas_release)
 
-        # Координаты для перетаскивания
-        self.drag_start = None
-
-        # Генерируем начальный фрактал
-        self.root.after(100, self.redraw)
-
-    def get_color(self, iterations, max_iter):
+    def _get_color(self, iterations, max_iter):
         """Получение цвета в зависимости от схемы"""
         if iterations == max_iter:
             return (0, 0, 0)  # Черный для точек множества
 
         ratio = iterations / max_iter
 
-        if self.color_scheme.get() == "rainbow":
-            hue = ratio * 0.7
-            return tuple(int(255 * c) for c in colorsys.hsv_to_rgb(hue, 1.0, 1.0))
+        color_schemes = {
+            "rainbow": self._rainbow_color,
+            "fire": self._fire_color,
+            "ocean": self._ocean_color,
+            "neon": self._neon_color,
+            "grayscale": self._grayscale_color,
+        }
 
-        elif self.color_scheme.get() == "fire":
-            r = min(255, int(ratio * 500))
-            g = min(255, int(ratio * 200))
-            b = min(255, int(ratio * 50))
-            return (r, g, b)
+        color_func = color_schemes.get(self.color_scheme.get(), self._grayscale_color)
+        return color_func(ratio)
 
-        elif self.color_scheme.get() == "ocean":
-            r = min(255, int(ratio * 100))
-            g = min(255, int(ratio * 200))
-            b = min(255, int(ratio * 400))
-            return (r, g, b)
+    def _rainbow_color(self, ratio):
+        """Радужная цветовая схема"""
+        hue = ratio * 0.7
+        return tuple(int(255 * c) for c in colorsys.hsv_to_rgb(hue, 1.0, 1.0))
 
-        elif self.color_scheme.get() == "neon":
-            hue = ratio * 0.8 + 0.6
-            saturation = 0.8 + 0.2 * np.sin(ratio * 10)
-            return tuple(
-                int(255 * c) for c in colorsys.hsv_to_rgb(hue, saturation, 1.0)
-            )
+    def _fire_color(self, ratio):
+        """Огненная цветовая схема"""
+        r = min(255, int(ratio * 500))
+        g = min(255, int(ratio * 200))
+        b = min(255, int(ratio * 50))
+        return (r, g, b)
 
-        else:  # grayscale
-            v = int(255 * (1 - ratio))
-            return (v, v, v)
+    def _ocean_color(self, ratio):
+        """Океанская цветовая схема"""
+        r = min(255, int(ratio * 100))
+        g = min(255, int(ratio * 200))
+        b = min(255, int(ratio * 400))
+        return (r, g, b)
+
+    def _neon_color(self, ratio):
+        """Неоновая цветовая схема"""
+        hue = ratio * 0.8 + 0.6
+        saturation = 0.8 + 0.2 * np.sin(ratio * 10)
+        return tuple(int(255 * c) for c in colorsys.hsv_to_rgb(hue, saturation, 1.0))
+
+    def _grayscale_color(self, ratio):
+        """Черно-белая цветовая схема"""
+        v = int(255 * (1 - ratio))
+        return (v, v, v)
 
     def redraw(self):
         """Перерисовка фрактала"""
@@ -236,7 +264,7 @@ class MandelbrotApp:
 
         self.computing = True
         self.info_label.configure(text="Вычисление... Пожалуйста, подождите")
-        self.root.update()
+        self.master.update()
 
         try:
             # Обновляем параметры
@@ -246,13 +274,7 @@ class MandelbrotApp:
             iterations = self.mandelbrot.generate()
 
             # Создаем изображение
-            image = Image.new("RGB", (self.width, self.height))
-            pixels = image.load()
-
-            for y in range(self.height):
-                for x in range(self.width):
-                    color = self.get_color(iterations[y, x], self.max_iter.get())
-                    pixels[x, y] = color
+            image = self._create_fractal_image(iterations)
 
             # Отображаем на холсте
             self.photo = ImageTk.PhotoImage(image)
@@ -260,37 +282,55 @@ class MandelbrotApp:
             self.canvas.create_image(self.width / 2, self.height / 2, image=self.photo)
 
             # Обновляем статистику
-            points_in_set = np.sum(iterations == self.max_iter.get())
-            total_points = self.width * self.height
-            percentage = (points_in_set / total_points) * 100
+            self._update_statistics(iterations)
 
-            self.stats_label.configure(
-                text=f"Точек в множестве: {points_in_set} ({percentage:.1f}%) | "
-                f"Масштаб: {self.mandelbrot.zoom:.2f}x | "
-                f"Смещение: ({self.mandelbrot.offset_x:.4f}, {self.mandelbrot.offset_y:.4f})"
-            )
-
-            self.zoom_label.configure(text=f"{self.mandelbrot.zoom:.2f}x")
-
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Ошибка при вычислении: {str(e)}")
+        except ValueError as e:
+            messagebox.showerror("Ошибка", f"Ошибка в параметрах: {str(e)}")
+        except MemoryError:
+            messagebox.showerror("Ошибка", "Недостаточно памяти для вычислений")
         finally:
             self.computing = False
             self.info_label.configure(text="Готово. Кликните для приближения")
 
-    def on_canvas_click(self, event):
+    def _create_fractal_image(self, iterations):
+        """Создание изображения фрактала"""
+        image = Image.new("RGB", (self.width, self.height))
+        pixels = image.load()
+
+        for y in range(self.height):
+            for x in range(self.width):
+                color = self._get_color(iterations[y, x], self.max_iter.get())
+                pixels[x, y] = color
+
+        return image
+
+    def _update_statistics(self, iterations):
+        """Обновление статистической информации"""
+        points_in_set = np.sum(iterations == self.max_iter.get())
+        total_points = self.width * self.height
+        percentage = (points_in_set / total_points) * 100
+
+        self.stats_label.configure(
+            text=f"Точек в множестве: {points_in_set} ({percentage:.1f}%) | "
+            f"Масштаб: {self.mandelbrot.zoom:.2f}x | "
+            f"Смещение: ({self.mandelbrot.offset_x:.4f}, {self.mandelbrot.offset_y:.4f})"
+        )
+
+        self.zoom_label.configure(text=f"{self.mandelbrot.zoom:.2f}x")
+
+    def _on_canvas_click(self, event):
         """Обработка клика для зума"""
         if not self.paused:
             self.mandelbrot.zoom_in(event.x, event.y, self.zoom_factor.get())
             self.redraw()
 
-    def on_canvas_drag(self, event):
-        """Начало перетаскивания"""
+    def _on_canvas_drag(self, event):
+        """Обработка перетаскивания"""
         if self.drag_start is None:
             self.drag_start = (event.x, event.y)
 
-    def on_canvas_release(self, event):
-        """Конец перетаскивания"""
+    def _on_canvas_release(self, event):
+        """Обработка отпускания кнопки мыши"""
         if self.drag_start:
             dx = event.x - self.drag_start[0]
             dy = event.y - self.drag_start[1]
@@ -321,8 +361,8 @@ class MandelbrotApp:
     def take_screenshot(self):
         """Создание скриншота"""
         try:
-            x = self.root.winfo_rootx() + self.canvas.winfo_x() + 10
-            y = self.root.winfo_rooty() + self.canvas.winfo_y() + 10
+            x = self.master.winfo_rootx() + self.canvas.winfo_x() + 10
+            y = self.master.winfo_rooty() + self.canvas.winfo_y() + 10
             width = self.canvas.winfo_width()
             height = self.canvas.winfo_height()
 
@@ -335,7 +375,7 @@ class MandelbrotApp:
             self.info_label.configure(
                 text=f"Скриншот сохранен: {os.path.abspath(filename)}"
             )
-        except Exception as e:
+        except (IOError, OSError) as e:
             messagebox.showerror("Ошибка", f"Не удалось создать скриншот: {str(e)}")
 
     def save_image(self):
@@ -350,7 +390,7 @@ class MandelbrotApp:
             mandelbrot_hd.offset_y = self.mandelbrot.offset_y
 
             self.info_label.configure(text="Сохранение в HD качестве...")
-            self.root.update()
+            self.master.update()
 
             iterations = mandelbrot_hd.generate()
 
@@ -359,7 +399,7 @@ class MandelbrotApp:
 
             for y in range(hd_height):
                 for x in range(hd_width):
-                    color = self.get_color(iterations[y, x], self.max_iter.get())
+                    color = self._get_color(iterations[y, x], self.max_iter.get())
                     pixels[x, y] = color
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -370,13 +410,18 @@ class MandelbrotApp:
                 text=f"HD изображение сохранено: {os.path.abspath(filename)}"
             )
 
-        except Exception as e:
+        except (IOError, OSError, MemoryError) as e:
             messagebox.showerror(
                 "Ошибка", f"Не удалось сохранить изображение: {str(e)}"
             )
 
 
-if __name__ == "__main__":
+def main():
+    """Главная функция для запуска приложения"""
     root = tk.Tk()
     app = MandelbrotApp(root)
     root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
