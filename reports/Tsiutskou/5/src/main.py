@@ -1,7 +1,7 @@
+from typing import Optional, List
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional, List
-from database import Session, Category, Supplier, Product, Service, Order, OrderItem
+from database import Session, Category, Supplier, Product, Service, Order
 
 app = FastAPI(title="Справочник товаров и услуг")
 
@@ -88,10 +88,10 @@ def create_product(prod: ProductCreate):
     return new
 
 
-@app.put("/products/{id}")
-def update_product(id: int, prod: ProductCreate):
+@app.put("/products/{product_id}")
+def update_product(product_id: int, prod: ProductCreate):
     db = Session()
-    p = db.query(Product).filter(Product.id == id).first()
+    p = db.query(Product).filter(Product.id == product_id).first()
     if not p:
         raise HTTPException(404, "Товар не найден")
     p.name = prod.name
@@ -104,10 +104,10 @@ def update_product(id: int, prod: ProductCreate):
     return p
 
 
-@app.delete("/products/{id}")
-def delete_product(id: int):
+@app.delete("/products/{product_id}")
+def delete_product(product_id: int):
     db = Session()
-    p = db.query(Product).filter(Product.id == id).first()
+    p = db.query(Product).filter(Product.id == product_id).first()
     if not p:
         raise HTTPException(404, "Товар не найден")
     db.delete(p)
