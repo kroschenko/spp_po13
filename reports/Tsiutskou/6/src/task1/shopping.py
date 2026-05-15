@@ -8,6 +8,9 @@ class Item:
         self.name = name
         self.price = price
 
+    def __repr__(self):
+        return f"Item(name={self.name}, price={self.price})"
+
 
 class Cart:
     def __init__(self):
@@ -26,6 +29,9 @@ class Cart:
             raise ValueError("Discount must be between 0 and 100")
         self.discount_percent = percent
 
+    def __repr__(self):
+        return f"Cart(items={len(self.items)}, discount={self.discount_percent}%)"
+
 
 coupons = {"SAVE10": 10, "HALF": 50}
 
@@ -38,4 +44,5 @@ def apply_coupon(cart, coupon_code):
 
 
 def log_purchase(item):
-    requests.post("https://example.com/log", json={"name": item.name, "price": item.price})
+    url = "https://example.com/log"
+    requests.post(url, json={"name": item.name, "price": item.price}, timeout=5)

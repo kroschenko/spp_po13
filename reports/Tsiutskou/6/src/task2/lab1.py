@@ -12,3 +12,8 @@ def find_majority_element(nums):
         if nums.count(x) > len(nums) // 2:
             return x
     return None
+
+
+if __name__ == "__main__":
+    print(generate_random_sequence(5))
+    print(find_majority_element([1, 2, 2, 2, 3]))

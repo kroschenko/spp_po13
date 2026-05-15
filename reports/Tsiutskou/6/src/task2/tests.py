@@ -1,4 +1,3 @@
-import pytest
 from lab1 import generate_random_sequence, find_majority_element
 
 
@@ -13,7 +12,7 @@ class TestGenerateRandomSequence:
 
     def test_zero_n(self):
         result = generate_random_sequence(0)
-        assert result == []
+        assert not result
 
     def test_one_element(self):
         result = generate_random_sequence(1)
