@@ -45,14 +45,14 @@ def repeat(pattern, repeat_count):
 # ============================================
 
 
-@pytest.fixture
-def simple_pattern():
+@pytest.fixture(name="simple_pattern")
+def fixture_simple_pattern():
     """Простой паттерн для тестов"""
     return "abc"
 
 
-@pytest.fixture
-def complex_pattern():
+@pytest.fixture(name="complex_pattern")
+def fixture_complex_pattern():
     """Сложный паттерн для тестов"""
     return "Hello World! "
 
