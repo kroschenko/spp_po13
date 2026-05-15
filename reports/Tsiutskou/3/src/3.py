@@ -1,6 +1,6 @@
 class State:
-    def __init__(self, atm):
-        self.atm = atm
+    def __init__(self, atm_object):
+        self.atm = atm_object
 
 
 class WaitState(State):
@@ -8,10 +8,10 @@ class WaitState(State):
         print("Карта вставлена. Введите PIN")
         self.atm.state = self.atm.auth
 
-    def enter_pin(self, pin):
+    def enter_pin(self, _pin):
         print("Сначала вставьте карту")
 
-    def withdraw(self, amount):
+    def withdraw(self, _amount):
         print("Сначала вставьте карту")
 
     def end(self):
@@ -30,7 +30,7 @@ class AuthState(State):
             print("PIN неверен")
             self.atm.state = self.atm.wait
 
-    def withdraw(self, amount):
+    def withdraw(self, _amount):
         print("Сначала введите PIN")
 
     def end(self):
@@ -42,7 +42,7 @@ class OperState(State):
     def insert_card(self):
         print("Карта уже есть")
 
-    def enter_pin(self, pin):
+    def enter_pin(self, _pin):
         print("PIN уже введен")
 
     def withdraw(self, amount):
@@ -66,10 +66,10 @@ class BlockState(State):
     def insert_card(self):
         print("Банкомат заблокирован")
 
-    def enter_pin(self, pin):
+    def enter_pin(self, _pin):
         print("Банкомат заблокирован")
 
-    def withdraw(self, amount):
+    def withdraw(self, _amount):
         print("Банкомат заблокирован")
 
     def end(self):
@@ -98,12 +98,13 @@ class ATM:
         self.state.end()
 
 
-atm = ATM(50000)
-atm.insert_card()
-atm.enter_pin("1111")
-atm.insert_card()
-atm.enter_pin("1234")
-atm.withdraw(15000)
-atm.insert_card()
-atm.enter_pin("1234")
-atm.withdraw(5000)
+if __name__ == "__main__":
+    ATM_MACHINE = ATM(50000)
+    ATM_MACHINE.insert_card()
+    ATM_MACHINE.enter_pin("1111")
+    ATM_MACHINE.insert_card()
+    ATM_MACHINE.enter_pin("1234")
+    ATM_MACHINE.withdraw(15000)
+    ATM_MACHINE.insert_card()
+    ATM_MACHINE.enter_pin("1234")
+    ATM_MACHINE.withdraw(5000)

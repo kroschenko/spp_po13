@@ -64,15 +64,17 @@ def show_account_info(account):
         print(f"  - {benefit}")
 
 
-base = BaseAccount()
-show_account_info(base)
-silver = SilverLevel(base)
-show_account_info(silver)
-gold = GoldLevel(silver)
-show_account_info(gold)
-print("\n=== Покупатель заказал книгу ===")
-book_price = 1000
-final_price = book_price - (book_price * gold.get_discount() / 100)
-print(f"Цена книги: {book_price} руб.")
-print(f"Скидка: {gold.get_discount()}%")
-print(f"Итого: {final_price} руб.")
+if __name__ == "__main__":
+    BASE = BaseAccount()
+    show_account_info(BASE)
+    SILVER = SilverLevel(BASE)
+    show_account_info(SILVER)
+    GOLD = GoldLevel(SILVER)
+    show_account_info(GOLD)
+
+    print("\n=== Покупатель заказал книгу ===")
+    BOOK_PRICE = 1000
+    FINAL_PRICE = BOOK_PRICE - (BOOK_PRICE * GOLD.get_discount() / 100)
+    print(f"Цена книги: {BOOK_PRICE} руб.")
+    print(f"Скидка: {GOLD.get_discount()}%")
+    print(f"Итого: {FINAL_PRICE} руб.")

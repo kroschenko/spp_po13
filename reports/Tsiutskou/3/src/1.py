@@ -52,11 +52,12 @@ class TeslaFactory(CarFactory):
         return TeslaHatchback()
 
 
-def produce_cars(factory, name):
-    print(f"\nЗавод {name}:")
-    print(factory.create_sedan().drive())
-    print(factory.create_hatchback().drive())
+def produce_cars(car_factory, factory_name):
+    print(f"\nЗавод {factory_name}:")
+    print(car_factory.create_sedan().drive())
+    print(car_factory.create_hatchback().drive())
 
 
-produce_cars(ToyotaFactory(), "Toyota")
-produce_cars(TeslaFactory(), "Tesla")
+if __name__ == "__main__":
+    produce_cars(ToyotaFactory(), "Toyota")
+    produce_cars(TeslaFactory(), "Tesla")
