@@ -1,10 +1,14 @@
 class Train:
-    def __init__(self, number, destination, date, time, price):
-        self.number = number
-        self.destination = destination
-        self.date = date
-        self.time = time
-        self.price = price
+    def __init__(self, train_data):
+        self.number = train_data["number"]
+
+        self.destination = train_data["destination"]
+
+        self.date = train_data["date"]
+
+        self.time = train_data["time"]
+
+        self.price = train_data["price"]
 
     def __str__(self):
         return (
@@ -27,7 +31,15 @@ class TicketSystem:
         time = input("Время поездки: ")
         price = float(input("Цена билета: "))
 
-        train = Train(number, destination, date, time, price)
+        train_data = {
+            "number": number,
+            "destination": destination,
+            "date": date,
+            "time": time,
+            "price": price,
+        }
+
+        train = Train(train_data)
 
         self.trains.append(train)
 
