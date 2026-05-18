@@ -1,35 +1,37 @@
 from unittest.mock import patch
 
 import pytest
+import requests
 
 from shopping import Cart
 
 
 @pytest.fixture
-def empty_cart():
+def cart_fixture():
     return Cart()
 
 
-def test_add_item(empty_cart):
-    empty_cart.add_item("Apple", 10)
+def test_add_item(cart_fixture):
+    cart_fixture.add_item("Apple", 10)
 
-    assert len(empty_cart.items) == 1
+    assert len(cart_fixture.items) == 1
 
 
-def test_negative_price(empty_cart):
+def test_negative_price(cart_fixture):
     with pytest.raises(ValueError):
-        empty_cart.add_item("Apple", -10)
+        cart_fixture.add_item("Apple", -10)
 
 
-def test_total(empty_cart):
-    empty_cart.add_item("Apple", 10)
-    empty_cart.add_item("Orange", 20)
+def test_total(cart_fixture):
+    cart_fixture.add_item("Apple", 10)
 
-    assert empty_cart.total() == 30
+    cart_fixture.add_item("Orange", 20)
+
+    assert cart_fixture.total() == 30
 
 
 @pytest.mark.parametrize(
-    "discount, result",
+    ("discount", "result"),
     [
         (0, 100),
         (50, 50),
@@ -60,8 +62,6 @@ def test_invalid_discount(discount):
 
 
 def log_purchase(item):
-    import requests
-
     requests.post(
         "https://example.com/log",
         json=item,
