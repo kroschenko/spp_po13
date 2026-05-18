@@ -27,8 +27,8 @@ class Line:
 
 
 class App:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, window):
+        self.root = window
 
         self.root.title("Point and Line")
 
@@ -99,11 +99,13 @@ class App:
 
         self.c_entry = ttk.Entry(control)
 
-        for label, entry, value in [
+        entries = [
             ("A", self.a_entry, "1"),
             ("B", self.b_entry, "-1"),
             ("C", self.c_entry, "0"),
-        ]:
+        ]
+
+        for label, entry, value in entries:
             ttk.Label(
                 control,
                 text=label,
@@ -151,13 +153,15 @@ class App:
 
             return
 
-        self.points = [
-            Point(
+        self.points = []
+
+        for _ in range(count):
+            point = Point(
                 random.uniform(-10, 10),
                 random.uniform(-10, 10),
             )
-            for _ in range(count)
-        ]
+
+            self.points.append(point)
 
     def update_line(self):
         try:
@@ -188,6 +192,74 @@ class App:
             "Screenshot saved",
         )
 
+    def draw_line(self):
+        a = self.line.a
+
+        b = self.line.b
+
+        c = self.line.c
+
+        x_values = [-10, 10]
+
+        if b != 0:
+            y_values = []
+
+            for x in x_values:
+                y = (-a * x - c) / b
+
+                y_values.append(y)
+
+        else:
+            x_values = [-c / a] * 2
+
+            y_values = [-10, 10]
+
+        self.ax.plot(
+            x_values,
+            y_values,
+            "k-",
+        )
+
+    def draw_points(self):
+        left = []
+
+        right = []
+
+        on_line = []
+
+        for point in self.points:
+            side = self.line.side(point)
+
+            if side > 0:
+                right.append(point)
+
+            elif side < 0:
+                left.append(point)
+
+            else:
+                on_line.append(point)
+
+        self.ax.scatter(
+            [p.x for p in left],
+            [p.y for p in left],
+            color="red",
+            label="Left",
+        )
+
+        self.ax.scatter(
+            [p.x for p in right],
+            [p.y for p in right],
+            color="blue",
+            label="Right",
+        )
+
+        self.ax.scatter(
+            [p.x for p in on_line],
+            [p.y for p in on_line],
+            color="green",
+            label="On line",
+        )
+
     def update_plot(self):
         if not self.root.winfo_exists():
             return
@@ -199,66 +271,9 @@ class App:
 
             self.ax.set_title("Point-Line")
 
-            a = self.line.a
+            self.draw_line()
 
-            b = self.line.b
-
-            c = self.line.c
-
-            x_values = [-10, 10]
-
-            if b != 0:
-                y_values = [(-a * x - c) / b for x in x_values]
-
-            else:
-                x_values = [-c / a] * 2
-
-                y_values = [-10, 10]
-
-            self.ax.plot(
-                x_values,
-                y_values,
-                "k-",
-            )
-
-            left = []
-
-            right = []
-
-            on_line = []
-
-            for point in self.points:
-                side = self.line.side(point)
-
-                if side > 0:
-                    right.append(point)
-
-                elif side < 0:
-                    left.append(point)
-
-                else:
-                    on_line.append(point)
-
-            self.ax.scatter(
-                [p.x for p in left],
-                [p.y for p in left],
-                color="red",
-                label="Left",
-            )
-
-            self.ax.scatter(
-                [p.x for p in right],
-                [p.y for p in right],
-                color="blue",
-                label="Right",
-            )
-
-            self.ax.scatter(
-                [p.x for p in on_line],
-                [p.y for p in on_line],
-                color="green",
-                label="On line",
-            )
+            self.draw_points()
 
             self.ax.legend()
 
@@ -276,8 +291,8 @@ class App:
         self.root.destroy()
 
 
-root = tk.Tk()
+main_window = tk.Tk()
 
-app = App(root)
+app = App(main_window)
 
-root.mainloop()
+main_window.mainloop()

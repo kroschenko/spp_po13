@@ -8,14 +8,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 matplotlib.use("TkAgg")
 
 
-def minkowski_curve(
-    x1,
-    y1,
-    x2,
-    y2,
-    depth,
-    points,
-):
+def minkowski_curve(start, end, depth, points):
+    x1, y1 = start
+
+    x2, y2 = end
+
     if depth == 0:
         points.append((x1, y1))
 
@@ -39,10 +36,8 @@ def minkowski_curve(
 
     for index in range(len(points_list) - 1):
         minkowski_curve(
-            points_list[index][0],
-            points_list[index][1],
-            points_list[index + 1][0],
-            points_list[index + 1][1],
+            points_list[index],
+            points_list[index + 1],
             depth - 1,
             points,
         )
@@ -52,37 +47,29 @@ def minkowski_island(depth):
     points = []
 
     minkowski_curve(
-        0,
-        0,
-        1,
-        0,
+        (0, 0),
+        (1, 0),
         depth,
         points,
     )
 
     minkowski_curve(
-        1,
-        0,
-        1,
-        1,
+        (1, 0),
+        (1, 1),
         depth,
         points,
     )
 
     minkowski_curve(
-        1,
-        1,
-        0,
-        1,
+        (1, 1),
+        (0, 1),
         depth,
         points,
     )
 
     minkowski_curve(
-        0,
-        1,
-        0,
-        0,
+        (0, 1),
+        (0, 0),
         depth,
         points,
     )
@@ -93,8 +80,8 @@ def minkowski_island(depth):
 
 
 class App:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, window):
+        self.root = window
 
         self.root.title("Minkowski Island")
 
@@ -195,8 +182,8 @@ class App:
         self.root.destroy()
 
 
-root = tk.Tk()
+main_window = tk.Tk()
 
-app = App(root)
+app = App(main_window)
 
-root.mainloop()
+main_window.mainloop()
