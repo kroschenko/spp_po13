@@ -1,4 +1,3 @@
-from typing import Optional, List
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from database import Session, Category, Supplier, Product, Service, Order
