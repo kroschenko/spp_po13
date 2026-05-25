@@ -1,6 +1,5 @@
-from datetime import datetime
 import pygame
-
+from datetime import datetime
 
 pygame.init()
 

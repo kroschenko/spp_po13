@@ -2,7 +2,6 @@ import math
 from datetime import datetime
 import pygame
 
-
 pygame.init()
 
 WIDTH = 800
