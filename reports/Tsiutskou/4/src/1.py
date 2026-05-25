@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import requests
 import matplotlib.pyplot as plt
 
-TOKEN = "token"
+TOKEN = ""
 
 
 def get_top_contributors(repo_name, days_count, min_commits_count):
@@ -70,15 +70,15 @@ def plot_activity(contributors, repo_name):
 
 
 if __name__ == "__main__":
-    REPO = input("Введите репозиторий (owner/repo): ")
-    DAYS = int(input("Выберите период (7/30/365 дней): "))
-    MIN_COMMITS = int(input("Минимальное количество коммитов: "))
+    REPO_NAME = input("Введите репозиторий (owner/repo): ")
+    DAYS_COUNT = int(input("Выберите период (7/30/365 дней): "))
+    MIN_COMMITS_COUNT = int(input("Минимальное количество коммитов: "))
 
-    TOP = get_top_contributors(REPO, DAYS, MIN_COMMITS)
+    TOP = get_top_contributors(REPO_NAME, DAYS_COUNT, MIN_COMMITS_COUNT)
 
-    print(f"\nТОП-5 активных контрибьюторов в '{REPO}' за {DAYS} дней:")
+    print(f"\nТОП-5 активных контрибьюторов в '{REPO_NAME}' за {DAYS_COUNT} дней:")
     for i, c in enumerate(TOP, 1):
         print(f"{i}. @{c['login']} - {c['commits']} коммитов, {c['prs']} PR")
 
     if TOP:
-        plot_activity(TOP, REPO)
+        plot_activity(TOP, REPO_NAME)
