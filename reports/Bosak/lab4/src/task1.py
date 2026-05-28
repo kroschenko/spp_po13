@@ -16,7 +16,7 @@ def search_repos(topic, per_page=100):
         url = f"{GITHUB_API}?q={topic}&sort=stars&order=desc&per_page=20&page={page}"
         response = requests.get(url, headers=HEADERS, timeout=10)
         if response.status_code != 200:
-            print(f"Error: {response.status_code}")
+            print(f"Ошибка: {response.status_code}")
             break
         data = response.json()
         repos.extend(data.get("items", []))
@@ -25,25 +25,53 @@ def search_repos(topic, per_page=100):
     return repos[:per_page]
 
 
-def analyze(repos):
-    """Analyze repositories and collect statistics."""
+def _extract_languages(repos):
+    """Extract language statistics."""
     lang_count = {}
+    for repo in repos:
+        lang = repo.get("language")
+        if lang:
+            lang_count[lang] = lang_count.get(lang, 0) + 1
+    return lang_count
+
+
+def _extract_repo_metrics(repos):
+    """Extract stars, forks, names and update dates."""
     stars = []
     forks = []
     repo_names = []
     last_updated = []
 
     for repo in repos:
-        lang = repo.get("language")
-        if lang:
-            lang_count[lang] = lang_count.get(lang, 0) + 1
-
         stars.append(repo.get("stargazers_count", 0))
         forks.append(repo.get("forks_count", 0))
         date_str = repo["updated_at"]
         date_obj = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
         last_updated.append(date_obj)
         repo_names.append(repo["full_name"])
+
+    return stars, forks, repo_names, last_updated
+
+
+def _print_statistics(lang_percent, top_repo, top_stars, avg_forks, old_percent):
+    """Print analysis results."""
+    print("\nСамые популярные языки:")
+    for lang, percent in sorted(lang_percent.items(), key=lambda x: x[1], reverse=True)[:5]:
+        print(f"- {lang} ({percent:.1f}%)")
+
+    if len(lang_percent) > 5:
+        other = 100 - sum(list(lang_percent.values())[:5])
+        print(f"- Другие ({other:.1f}%)")
+
+    print(f"\nСамый звёздный репозиторий: \"{top_repo}\" ({top_stars} звёзд)")
+    print(f"Среднее количество форков: {avg_forks:.1f}")
+    print(f"{old_percent:.0f}% репозиториев не обновлялись больше года!")
+
+
+def analyze(repos):
+    """Analyze repositories and collect statistics."""
+    lang_count = _extract_languages(repos)
+    stars, forks, repo_names, last_updated = _extract_repo_metrics(repos)
 
     total = sum(lang_count.values())
     lang_percent = {k: (v / total) * 100 for k, v in lang_count.items()}
@@ -58,17 +86,7 @@ def analyze(repos):
     old_count = sum(1 for d in last_updated if (now - d).days > 365)
     old_percent = (old_count / len(last_updated)) * 100
 
-    print("\nMost popular languages:")
-    for lang, percent in sorted(lang_percent.items(), key=lambda x: x[1], reverse=True)[:5]:
-        print(f"- {lang} ({percent:.1f}%)")
-
-    if len(lang_percent) > 5:
-        other = 100 - sum(list(lang_percent.values())[:5])
-        print(f"- Other ({other:.1f}%)")
-
-    print(f"\nMost starred repo: \"{top_repo}\" ({top_stars} stars)")
-    print(f"Average forks: {avg_forks:.1f}")
-    print(f"{old_percent:.0f}% repos not updated in over a year!")
+    _print_statistics(lang_percent, top_repo, top_stars, avg_forks, old_percent)
 
     return lang_percent, stars, repo_names, last_updated
 
@@ -83,43 +101,43 @@ def visualize(lang_percent, stars, repo_names, last_updated, topic):
     plt.subplot(1, 3, 1)
     if sum(percents) > 0:
         plt.pie(percents, labels=langs, autopct="%1.0f%%")
-    plt.title("Popular Languages")
+    plt.title("Популярные языки")
 
     plt.subplot(1, 3, 2)
     top_stars = stars[:10]
     top_names = [n.split("/")[-1][:15] for n in repo_names[:10]]
     plt.barh(top_names[::-1], top_stars[::-1])
-    plt.xlabel("Stars")
-    plt.title("Top 10 by Stars")
+    plt.xlabel("Звёзды")
+    plt.title("Топ-10 по звёздам")
 
     plt.subplot(1, 3, 3)
     now = datetime.now(timezone.utc)
     days_since = [(now - d).days for d in last_updated[:50]]
     plt.hist(days_since, bins=15, color="orange", edgecolor="black")
-    plt.xlabel("Days without updates")
-    plt.ylabel("Number of repos")
-    plt.title("Last Update Age")
+    plt.xlabel("Дней без обновлений")
+    plt.ylabel("Количество репозиториев")
+    plt.title("Давность последнего обновления")
 
     plt.tight_layout()
     filename = f"{topic.replace(' ', '_')}_analysis.png"
     plt.savefig(filename)
-    print(f"\nGraphs saved to \"{filename}\"")
+    print(f"\nГрафики сохранены в \"{filename}\"")
     plt.show()
 
 
 def get_user_input():
     """Get topic from user."""
-    return input("Enter topic to analyze: ")
+    return input("Введите тему для анализа: ")
 
 
 def main():
     """Main function to run the analysis."""
     topic = get_user_input()
-    print(f'Analyzing 100 popular repos on "{topic}"...')
+    print(f'Анализируем 100 популярных репозиториев по теме "{topic}"...')
 
     repos = search_repos(topic)
     if not repos:
-        print("No repositories found")
+        print("Репозитории не найдены")
         return
 
     lang_percent, stars, repo_names, last_updated = analyze(repos)
