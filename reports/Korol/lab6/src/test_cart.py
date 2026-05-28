@@ -6,28 +6,28 @@ import requests
 from shopping import Cart
 
 
-@pytest.fixture
-def cart_fixture():
+@pytest.fixture(name="cart_data")
+def fixture_cart():
     return Cart()
 
 
-def test_add_item(cart_fixture):
-    cart_fixture.add_item("Apple", 10)
+def test_add_item(cart_data):
+    cart_data.add_item("Apple", 10)
 
-    assert len(cart_fixture.items) == 1
+    assert len(cart_data.items) == 1
 
 
-def test_negative_price(cart_fixture):
+def test_negative_price(cart_data):
     with pytest.raises(ValueError):
-        cart_fixture.add_item("Apple", -10)
+        cart_data.add_item("Apple", -10)
 
 
-def test_total(cart_fixture):
-    cart_fixture.add_item("Apple", 10)
+def test_total(cart_data):
+    cart_data.add_item("Apple", 10)
 
-    cart_fixture.add_item("Orange", 20)
+    cart_data.add_item("Orange", 20)
 
-    assert cart_fixture.total() == 30
+    assert cart_data.total() == 30
 
 
 @pytest.mark.parametrize(
