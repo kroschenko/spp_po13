@@ -1,13 +1,16 @@
-import requests
-import matplotlib.pyplot as plt
+"""Module for GitHub repository analysis."""
+
 from datetime import datetime, timezone
 
+import matplotlib.pyplot as plt
+import requests
 
 GITHUB_API = "https://api.github.com/search/repositories"
 HEADERS = {"Accept": "application/vnd.github+json", "User-Agent": "Python-Script"}
 
 
 def search_repos(topic, per_page=100):
+    """Search top repositories by topic."""
     repos = []
     for page in range(1, 6):
         url = f"{GITHUB_API}?q={topic}&sort=stars&order=desc&per_page=20&page={page}"
@@ -23,6 +26,7 @@ def search_repos(topic, per_page=100):
 
 
 def analyze(repos):
+    """Analyze repositories and collect statistics."""
     lang_count = {}
     stars = []
     forks = []
@@ -70,6 +74,7 @@ def analyze(repos):
 
 
 def visualize(lang_percent, stars, repo_names, last_updated, topic):
+    """Create and save visualization graphs."""
     langs = list(lang_percent.keys())[:7]
     percents = list(lang_percent.values())[:7]
 
@@ -102,8 +107,14 @@ def visualize(lang_percent, stars, repo_names, last_updated, topic):
     plt.show()
 
 
+def get_user_input():
+    """Get topic from user."""
+    return input("Enter topic to analyze: ")
+
+
 def main():
-    topic = input("Enter topic to analyze: ")
+    """Main function to run the analysis."""
+    topic = get_user_input()
     print(f'Analyzing 100 popular repos on "{topic}"...')
 
     repos = search_repos(topic)
@@ -117,4 +128,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
